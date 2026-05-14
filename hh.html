@@ -4,109 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABOUD STORE | عبود ستور</title>
+    <!-- استدعاء مكتبات Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
         :root { --main-orange: #f97316; --dark-green: #064e3b; --bg-navy: #0f172a; --card-white: #ffffff; }
-        body { background-color: var(--bg-navy); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 50px; }
+        body { background-color: var(--bg-navy); color: white; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
+        header { background: var(--dark-green); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--main-orange); }
+        .logo { color: var(--main-orange); font-weight: bold; font-size: 1.5rem; cursor: pointer; }
         
-        header { background: var(--dark-green); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--main-orange); position: sticky; top: 0; z-index: 1000; }
-        .logo { color: var(--main-orange); font-weight: bold; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        /* لوحة التحكم مخفية افتراضياً */
+        #adminPanel { display: none; margin: 20px; padding: 20px; border: 2px dashed var(--main-orange); border-radius: 20px; background: rgba(30, 41, 59, 0.9); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
+        .add-btn { background: var(--main-orange); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; }
 
-        .admin-section { margin: 20px; padding: 20px; border: 2px dashed var(--main-orange); border-radius: 20px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
-        .admin-section h3 { text-align: center; color: var(--main-orange); margin-top: 0; }
-        input[type="text"], input[type="number"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; box-sizing: border-box; background: #0f172a; color: white; }
-        .add-btn { background: var(--main-orange); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; }
-        .add-btn:hover { background: #ea580c; }
-
-        .products-container { padding: 15px; }
-        .section-title { color: var(--main-orange); border-right: 4px solid var(--main-orange); padding-right: 10px; margin-bottom: 20px; }
-        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        
-        .card { background: var(--card-white); border-radius: 15px; padding: 10px; text-align: center; color: #1e293b; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .card:active { transform: scale(0.95); }
-        .card img { width: 100%; height: 140px; border-radius: 10px; margin-bottom: 10px; background: #f8fafc; object-fit: cover; }
-        .card h4 { margin: 5px 0; font-size: 0.95rem; height: 40px; overflow: hidden; }
-        .card .price { color: var(--main-orange); font-weight: bold; font-size: 1.1rem; margin: 5px 0; }
-        
-        .del-btn { position: absolute; top: -5px; left: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .wa-btn { background: #22c55e; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; margin-top: 5px; font-size: 0.9rem; font-weight: bold; cursor: pointer; }
+        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .card { background: var(--card-white); border-radius: 15px; padding: 10px; text-align: center; color: #1e293b; position: relative; }
+        .card img { width: 100%; height: 140px; border-radius: 10px; object-fit: cover; }
+        .price { color: var(--main-orange); font-weight: bold; margin: 5px 0; }
+        .wa-btn { background: #22c55e; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .del-btn { position: absolute; top: 5px; left: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">ABOUD STORE</div>
-    <div style="font-size: 1.4rem;">🔍 🛒</div>
+    <div class="logo" onclick="checkAdmin()">ABOUD STORE</div>
+    <div>🛒</div>
 </header>
 
-<div class="admin-section" id="adminPanel">
-    <h3>إدارة متجر عبود (الأدمن)</h3>
+<div id="adminPanel">
+    <h3>لوحة إدارة عبود ستور</h3>
     <input type="text" id="pName" placeholder="اسم المنتج">
-    <input type="number" id="pPrice" placeholder="السعر بالدينار العراقي">
-    <label style="display:block; margin: 10px 5px 5px; font-size: 0.8rem;">اختر صورة المنتج:</label>
+    <input type="number" id="pPrice" placeholder="السعر د.ع">
     <input type="file" id="pImgFile" accept="image/*">
-    <button class="add-btn" onclick="processAndSave()">نشر المنتج في المتجر</button>
+    <button class="add-btn" onclick="uploadToFirebase()">نشر المنتج للجميع</button>
 </div>
 
-<div class="products-container">
-    <h3 class="section-title">أحدث الملحقات التقنية</h3>
-    <div class="products-grid" id="productsDisplay"></div>
+<div class="products-grid" id="productsDisplay">
+    <!-- المنتجات تظهر هنا من السيرفر -->
 </div>
 
 <script>
-    let products = JSON.parse(localStorage.getItem('aboud_products')) || [];
+    // 1. ضع معلومات مشروعك هنا من Firebase Console
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    function renderProducts() {
-        const display = document.getElementById('productsDisplay');
-        display.innerHTML = products.map((item, index) => `
-            <div class="card">
-                <button class="del-btn" onclick="deleteProduct(${index})">×</button>
-                <img src="${item.img}" alt="${item.name}">
-                <h4>${item.name}</h4>
-                <div class="price">${item.price.toLocaleString()} د.ع</div>
-                <button class="wa-btn" onclick="orderWhatsApp('${item.name}')">طلب عبر واتساب</button>
-            </div>
-        `).join('');
+    // 2. دالة التحقق من الأدمن (اضغط على اللوجو لتفتحها)
+    function checkAdmin() {
+        const pass = prompt("أدخل كلمة مرور الإدارة:");
+        if(pass === "2026") { // يمكنك تغيير الرمز هنا
+            document.getElementById('adminPanel').style.display = 'block';
+            const delBtns = document.querySelectorAll('.del-btn');
+            delBtns.forEach(btn => btn.style.display = 'block');
+        }
     }
 
-    function processAndSave() {
+    // 3. رفع المنتج للسيرفر
+    function uploadToFirebase() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
-        const fileInput = document.getElementById('pImgFile');
-        const file = fileInput.files[0];
+        const file = document.getElementById('pImgFile').files[0];
 
-        if (name && price && file) {
+        if(name && price && file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                products.push({ name: name, price: parseInt(price), img: e.target.result });
-                localStorage.setItem('aboud_products', JSON.stringify(products));[span_2](start_span)[span_2](end_span)
-                renderProducts();
-                document.getElementById('pName').value = '';
-                document.getElementById('pPrice').value = '';
-                document.getElementById('pImgFile').value = '';
-                alert("تمت الإضافة بنجاح!");
+                db.ref('products').push({
+                    name: name,
+                    price: price,
+                    img: e.target.result
+                });
+                alert("تم النشر بنجاح! سيراها جميع الزوار الآن.");
+                document.getElementById('adminPanel').style.display = 'none';
             };
             reader.readAsDataURL(file);
-        } else {
-            alert("يرجى إكمال جميع الحقول");
         }
     }
 
-    function deleteProduct(index) {
-        if (confirm("هل تريد الحذف؟")) {
-            products.splice(index, 1);
-            localStorage.setItem('aboud_products', JSON.stringify(products));[span_3](start_span)[span_3](end_span)
-            renderProducts();
+    // 4. جلب المنتجات وعرضها للجميع تلقائياً
+    db.ref('products').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const display = document.getElementById('productsDisplay');
+        display.innerHTML = '';
+        for(let id in data) {
+            const item = data[id];
+            display.innerHTML += `
+                <div class="card">
+                    <button class="del-btn" onclick="deleteItem('${id}')">×</button>
+                    <img src="${item.img}">
+                    <h4>${item.name}</h4>
+                    <div class="price">${parseInt(item.price).toLocaleString()} د.ع</div>
+                    <button class="wa-btn" onclick="order('${item.name}')">اطلب الآن</button>
+                </div>
+            `;
         }
+    });
+
+    function deleteItem(id) {
+        if(confirm("حذف المنتج من السيرفر؟")) db.ref('products/' + id).remove();
     }
 
-    function orderWhatsApp(productName) {
-        const phone = "9647818025533";[span_4](start_span)[span_4](end_span)
-        const message = encodeURIComponent("مرحباً عبود ستور، أريد طلب: " + productName);
-        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    function order(name) {
+        window.open(`https://wa.me/9647818025533?text=${encodeURIComponent('أريد طلب: ' + name)}`);
     }
-
-    renderProducts();
 </script>
-
 </body>
 </html>
