@@ -19,10 +19,10 @@
         .search-container { padding: 15px 15px 5px 15px; }
         #searchBar { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(255,255,255,0.05); color: white; outline: none; font-family: 'Cairo'; box-sizing: border-box; }
 
-        /* تعديل السلايدر ليظهر الإعلان كاملاً */
-        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 220px; position: relative; border: 1px solid var(--neon); background: #000; }
-        .slider-container img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; transition: 1.5s ease-in-out; }
-        .slider-container img.active { opacity: 1; }
+        /* سلايدر الإعلانات الخرافي */
+        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 200px; position: relative; border: 1px solid var(--neon); background: #000; box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); }
+        .slider-container img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; transform: scale(1.1); transition: opacity 1s ease-in-out, transform 1.5s ease-in-out; }
+        .slider-container img.active { opacity: 1; transform: scale(1); }
 
         .categories { display: flex; gap: 10px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; }
         .cat-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 22px; border-radius: 30px; white-space: nowrap; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
@@ -31,14 +31,16 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; padding: 15px; }
         .card { background: var(--card); border-radius: 25px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: center; transition: 0.4s; }
         .card img { width: 100%; height: 150px; object-fit: contain; border-radius: 15px; background: #000; }
-        .desc { font-size: 0.8rem; color: #aaa; margin: 10px 0; display: block; word-wrap: break-word; line-height: 1.5; }
+        .desc { font-size: 0.8rem; color: #aaa; margin: 10px 0; display: block; line-height: 1.4; height: 40px; overflow-y: auto; }
         .price { color: var(--neon); font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; }
         .add-cart { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; background: linear-gradient(45deg, var(--neon), #0088ff); color: #000; cursor: pointer; }
 
         .cart-wrapper { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 3000; }
-        .cart-float { background: linear-gradient(90deg, var(--neon), #0088ff); color: #000; padding: 18px; border-radius: 20px; display: none; justify-content: space-between; align-items: center; font-weight: bold; box-shadow: 0 8px 30px rgba(0, 242, 255, 0.4); cursor: pointer; }
+        .cart-float { background: linear-gradient(90deg, var(--neon), #0088ff); color: #000; padding: 18px; border-radius: 20px; display: none; justify-content: space-between; align-items: center; font-weight: bold; box-shadow: 0 8px 30px rgba(0, 242, 255, 0.4); }
 
+        /* لوحة التحكم المطورة */
         #admin-panel { display: none; background: #111; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 25px; position: absolute; width: 90%; z-index: 5000; top: 5%; box-sizing: border-box; }
+        .admin-section { background: #1a1a1a; padding: 10px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
     </style>
 </head>
@@ -52,24 +54,31 @@
 
 <div id="admin-panel">
     <button onclick="this.parentElement.style.display='none'" style="float:left; background:red; color:white; border:none; border-radius:50%; width:30px; height:30px;">X</button>
-    <h3 id="formTitle">إدارة المتجر</h3>
-    <input type="hidden" id="editId">
-    <input type="text" id="pN" placeholder="اسم المنتج">
-    <textarea id="pD" placeholder="وصف المنتج"></textarea>
-    <input type="text" id="pP" placeholder="السعر">
-    <select id="pC">
-        <option value="هواتف">هواتف</option>
-        <option value="سماعات">سماعات</option>
-        <option value="إكسسوارات">إكسسوارات</option>
-        <option value="شواحن">شواحن</option>
-    </select>
-    <input type="file" id="pI" accept="image/*">
-    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold;">حفظ المنتج</button>
-    <hr>
-    <h4 style="color:var(--neon)">إضافة صور للسلايدر:</h4>
-    <input type="file" id="adI" accept="image/*">
-    <button onclick="uploadAd()" style="width:100%; padding:10px; background:white; color:black; border:none; border-radius:10px; font-weight:bold;">رفع صورة الإعلان</button>
-    <div id="admin-list" style="max-height:150px; overflow-y:auto; margin-top:15px;"></div>
+    <h3>لوحة التحكم</h3>
+    
+    <div class="admin-section">
+        <h4 style="color:var(--neon); margin:0;">إضافة منتج</h4>
+        <input type="text" id="pN" placeholder="اسم المنتج">
+        <textarea id="pD" placeholder="الوصف"></textarea>
+        <input type="text" id="pP" placeholder="السعر">
+        <select id="pC">
+            <option value="هواتف">هواتف</option>
+            <option value="سماعات">سماعات</option>
+            <option value="إكسسوارات">إكسسوارات</option>
+            <option value="شواحن">شواحن</option>
+        </select>
+        <input type="file" id="pI" accept="image/*">
+        <button onclick="save()" style="width:100%; padding:12px; background:var(--neon); border:none; border-radius:10px; font-weight:bold;">نشر المنتج</button>
+    </div>
+
+    <div class="admin-section">
+        <h4 style="color:var(--purple); margin:0;">إدارة الإعلانات (سلايدر)</h4>
+        <input type="file" id="adI" accept="image/*">
+        <button onclick="uploadAd()" style="width:100%; padding:10px; background:var(--purple); color:white; border:none; border-radius:10px; font-weight:bold;">رفع إعلان جديد</button>
+        <div id="ads-admin-list" style="max-height:120px; overflow-y:auto; margin-top:10px;"></div>
+    </div>
+
+    <div id="admin-list" style="max-height:150px; overflow-y:auto; border-top:1px solid #333; padding-top:10px;"></div>
 </div>
 
 <div class="search-container">
@@ -89,10 +98,10 @@
 <div class="products-grid" id="main-list"></div>
 
 <div class="cart-wrapper">
-    <div id="cartDetails" style="background:rgba(0,0,0,0.9); border:1px solid var(--neon); border-radius:20px; margin-bottom:10px; display:none; padding:15px;"></div>
+    <div id="cartDetails" style="background:rgba(0,0,0,0.95); border:1px solid var(--neon); border-radius:20px; margin-bottom:10px; display:none; padding:15px;"></div>
     <div id="cartBar" class="cart-float" onclick="toggleCart()">
         <span>🛒 <span id="count">0</span> قطع | <span id="total">0</span> د.ع</span>
-        <button style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:10px;" onclick="sendWA(event)">طلب الآن</button>
+        <button style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:10px;" onclick="sendWA(event)">اطلب الآن</button>
     </div>
 </div>
 
@@ -104,54 +113,66 @@
     firebase.initializeApp(config);
     const db = firebase.database();
 
-    let items = [], cart = [];
+    let items = [], cart = [], adInterval;
 
     function checkAdmin() { if(prompt("رمز الدخول:") === "ABOJL2001") document.getElementById('admin-panel').style.display='block'; }
 
     function save() {
-        const id = document.getElementById('editId').value, n = document.getElementById('pN').value, d = document.getElementById('pD').value, p = document.getElementById('pP').value, c = document.getElementById('pC').value, i = document.getElementById('pI').files[0];
-        const data = { n, d, p, c };
-        if(i) {
-            const r = new FileReader();
-            r.onload = (e) => { data.i = e.target.result; id ? db.ref('products/'+id).update(data) : db.ref('products').push(data); location.reload(); };
-            r.readAsDataURL(i);
-        } else if(id) {
-            db.ref('products/'+id).update(data).then(() => location.reload());
-        }
+        const n = document.getElementById('pN').value, d = document.getElementById('pD').value, p = document.getElementById('pP').value, c = document.getElementById('pC').value, i = document.getElementById('pI').files[0];
+        if(!i) return alert("اختر صورة للمنتج");
+        const r = new FileReader();
+        r.onload = (e) => { db.ref('products').push({ n, d, p, c, i: e.target.result }).then(() => location.reload()); };
+        r.readAsDataURL(i);
     }
 
     function uploadAd() {
         const i = document.getElementById('adI').files[0];
-        if(i) {
-            const r = new FileReader();
-            r.onload = (e) => { db.ref('ads').push({ i: e.target.result }).then(() => alert("تم رفع الإعلان بنجاح!")); };
-            r.readAsDataURL(i);
-        }
+        if(!i) return alert("اختر صورة للإعلان");
+        const r = new FileReader();
+        r.onload = (e) => { db.ref('ads').push({ i: e.target.result }).then(() => alert("تمت إضافة الإعلان!")); };
+        r.readAsDataURL(i);
     }
 
-    function renderAds(ads) {
+    // جلب وحذف الإعلانات
+    db.ref('ads').on('value', s => {
         const container = document.getElementById('ads-slider');
-        container.innerHTML = '';
-        let keys = Object.keys(ads);
-        keys.forEach((key, index) => {
+        const adminList = document.getElementById('ads-admin-list');
+        container.innerHTML = ''; adminList.innerHTML = '';
+        
+        if(!s.exists()) {
+            container.innerHTML = '<img src="https://via.placeholder.com/800x400/000/00f2ff?text=Aboud+Store" class="active">';
+            return;
+        }
+
+        let adsData = s.val(), index = 0;
+        for(let id in adsData) {
+            // للسلايدر
             const img = document.createElement('img');
-            img.src = ads[key].i;
+            img.src = adsData[id].i;
             if(index === 0) img.classList.add('active');
             container.appendChild(img);
-        });
-    }
+            // للوحة التحكم (حذف)
+            adminList.innerHTML += `<div style="display:flex; justify-content:space-between; margin:5px 0;"><span>إعلان ${index+1}</span><button onclick="db.ref('ads/${id}').remove()" style="color:red; background:none; border:none; cursor:pointer;">حذف</button></div>`;
+            index++;
+        }
+        startSlider();
+    });
 
-    db.ref('ads').on('value', s => { if(s.exists()) renderAds(s.val()); });
-
-    function render(data) {
-        const l = document.getElementById('main-list'); l.innerHTML = '';
-        data.forEach(p => {
-            l.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d || ''}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
-        });
+    function startSlider() {
+        clearInterval(adInterval);
+        let sIdx = 0;
+        adInterval = setInterval(() => {
+            const imgs = document.querySelectorAll('#ads-slider img');
+            if(imgs.length > 1) {
+                imgs[sIdx].classList.remove('active');
+                sIdx = (sIdx + 1) % imgs.length;
+                imgs[sIdx].classList.add('active');
+            }
+        }, 4000);
     }
 
     db.ref('products').on('value', s => {
-        items = []; const aL = document.getElementById('admin-list'); aL.innerHTML = '';
+        items = []; const aL = document.getElementById('admin-list'); aL.innerHTML = '<h4 style="color:#fff">المنتجات الحالية:</h4>';
         s.forEach(c => {
             const d = c.val(); d.id = c.key; items.push(d);
             aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333"><span>${d.n}</span><button onclick="db.ref('products/${d.id}').remove()" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div>`;
@@ -159,16 +180,12 @@
         render(items);
     });
 
-    // تبديل الصور تلقائياً
-    let sIdx = 0;
-    setInterval(() => {
-        const imgs = document.querySelectorAll('#ads-slider img');
-        if(imgs.length > 1) {
-            imgs[sIdx].classList.remove('active');
-            sIdx = (sIdx + 1) % imgs.length;
-            imgs[sIdx].classList.add('active');
-        }
-    }, 4000);
+    function render(data) {
+        const l = document.getElementById('main-list'); l.innerHTML = '';
+        data.forEach(p => {
+            l.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d || ''}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
+        });
+    }
 
     function search() { const q = document.getElementById('searchBar').value.toLowerCase(); render(items.filter(x => x.n.toLowerCase().includes(q))); }
     function filterCat(cat, btn) { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(cat === 'الكل' ? items : items.filter(x => x.c === cat)); }
@@ -178,12 +195,12 @@
         if(cart.length > 0) {
             bar.style.display = 'flex';
             document.getElementById('count').innerText = cart.length;
-            let sum = 0; det.innerHTML = '<h4>سلتك:</h4>';
-            cart.forEach((x, i) => { sum += x.p; det.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${x.n}</span><i class="fas fa-trash" style="color:red" onclick="cart.splice(${i},1);updateUI()"></i></div>`; });
+            let sum = 0; det.innerHTML = '<h4>🛒 سلتك الحالية:</h4>';
+            cart.forEach((x, i) => { sum += x.p; det.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${x.n}</span><i class="fas fa-times" style="color:red" onclick="cart.splice(${i},1);updateUI()"></i></div>`; });
             document.getElementById('total').innerText = sum.toLocaleString();
         } else { bar.style.display = 'none'; det.style.display = 'none'; }
     }
-    function sendWA(e) { e.stopPropagation(); let m = "طلب جديد من عبود ستور:%0a"; cart.forEach((x, i) => m += `${i+1}- ${x.n}%0a`); window.open(`https://wa.me/9647818025533?text=${m}`); }
+    function sendWA(e) { e.stopPropagation(); let m = "طلب من عبود ستور:%0a"; cart.forEach((x, i) => m += `${i+1}- ${x.n}%0a`); window.open(`https://wa.me/9647818025533?text=${m}`); }
     function toggleCart() { const d = document.getElementById('cartDetails'); d.style.display = d.style.display === 'block' ? 'none' : 'block'; }
 </script>
 </body>
