@@ -3,122 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABOUD STORE | عبود ستور</title>
-    <!-- استدعاء مكتبات Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
+    <title>Aboud Store | عبود ستور</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main-orange: #f97316; --dark-green: #064e3b; --bg-navy: #0f172a; --card-white: #ffffff; }
-        body { background-color: var(--bg-navy); color: white; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
-        header { background: var(--dark-green); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--main-orange); }
-        .logo { color: var(--main-orange); font-weight: bold; font-size: 1.5rem; cursor: pointer; }
-        
-        /* لوحة التحكم مخفية افتراضياً */
-        #adminPanel { display: none; margin: 20px; padding: 20px; border: 2px dashed var(--main-orange); border-radius: 20px; background: rgba(30, 41, 59, 0.9); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
-        .add-btn { background: var(--main-orange); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; }
+        :root {
+            --neon-color: #00f2ff;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+        }
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            min-height: 100vh;
+        }
+        header {
+            text-align: center;
+            padding: 25px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(0, 242, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--neon-color);
+            text-shadow: 0 0 15px var(--neon-color);
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .logo:hover { transform: scale(1.05); }
 
-        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-        .card { background: var(--card-white); border-radius: 15px; padding: 10px; text-align: center; color: #1e293b; position: relative; }
-        .card img { width: 100%; height: 140px; border-radius: 10px; object-fit: cover; }
-        .price { color: var(--main-orange); font-weight: bold; margin: 5px 0; }
-        .wa-btn { background: #22c55e; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .del-btn { position: absolute; top: 5px; left: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; display: none; }
+        #adminPanel {
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--neon-color);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            color: white;
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input:focus { border-color: var(--neon-color); }
+
+        .add-btn {
+            background: var(--neon-color);
+            color: #000;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--neon-color);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        .product-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.4s;
+            text-align: center;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--neon-color);
+            box-shadow: 0 10px 20px rgba(0, 242, 255, 0.15);
+        }
+        .product-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .product-card h3 { font-size: 1rem; margin: 10px 0; font-weight: 500; }
+        .price {
+            color: var(--neon-color);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-shadow: 0 0 5px rgba(0, 242, 255, 0.3);
+        }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo" onclick="checkAdmin()">ABOUD STORE</div>
-    <div>🛒</div>
 </header>
 
 <div id="adminPanel">
-    <h3>لوحة إدارة عبود ستور</h3>
-    <input type="text" id="pName" placeholder="اسم المنتج">
-    <input type="number" id="pPrice" placeholder="السعر د.ع">
+    <h3 style="text-align:center; color:var(--neon-color);">إضافة منتج جديد</h3>
+    <input type="text" id="pName" placeholder="اسم الجهاز">
+    <input type="text" id="pPrice" placeholder="السعر (مثلاً: 750,000 د.ع)">
     <input type="file" id="pImgFile" accept="image/*">
-    <button class="add-btn" onclick="uploadToFirebase()">نشر المنتج للجميع</button>
+    <button class="add-btn" onclick="uploadToFirebase()">نشر في المتجر</button>
 </div>
 
 <div class="products-grid" id="productsDisplay">
-    <!-- المنتجات تظهر هنا من السيرفر -->
-</div>
+    </div>
 
 <script>
-    // 1. ضع معلومات مشروعك هنا من Firebase Console
     const firebaseConfig = {
-  apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s",
-  authDomain: "aboud-store-f7a16.firebaseapp.com",
-  projectId: "aboud-store-f7a16",
-  storageBucket: "aboud-store-f7a16.firebasestorage.app",
-  messagingSenderId: "554846072421",
-  appId: "1:554846072421:web:214e6516b8cbf88715208c",
-  measurementId: "G-W2CKDFR3CY"
-};
+        apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s",
+        authDomain: "aboud-store-f7a16.firebaseapp.com",
+        projectId: "aboud-store-f7a16",
+        storageBucket: "aboud-store-f7a16.firebasestorage.app",
+        messagingSenderId: "554846072421",
+        appId: "1:554846072421:web:214e6516b8cbf88715208c",
+        measurementId: "G-W2CKDFR3CY"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. دالة التحقق من الأدمن (اضغط على اللوجو لتفتحها)
     function checkAdmin() {
-        const pass = prompt("أدخل كلمة مرور الإدارة:");
-        if(pass === "ABOJL2001") { // يمكنك تغيير الرمز هنا
+        const pass = prompt("أدخل كلمة مرور المسؤول:");
+        if(pass === "ABOJL2001") { // كلمة المرور الجديدة
             document.getElementById('adminPanel').style.display = 'block';
-            const delBtns = document.querySelectorAll('.del-btn');
-            delBtns.forEach(btn => btn.style.display = 'block');
+            window.scrollTo(0, 0);
+        } else if (pass !== null) {
+            alert("كلمة المرور خاطئة!");
         }
     }
 
-    // 3. رفع المنتج للسيرفر
     function uploadToFirebase() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
         const file = document.getElementById('pImgFile').files[0];
 
         if(name && price && file) {
+            const btn = document.querySelector('.add-btn');
+            btn.innerText = "جاري الرفع...";
+            btn.disabled = true;
+
             const reader = new FileReader();
             reader.onload = function(e) {
+                const imgData = e.target.result;
                 db.ref('products').push({
                     name: name,
                     price: price,
-                    img: e.target.result
+                    image: imgData
+                }).then(() => {
+                    alert("تم النشر بنجاح!");
+                    location.reload(); 
                 });
-                alert("تم النشر بنجاح! سيراها جميع الزوار الآن.");
-                document.getElementById('adminPanel').style.display = 'none';
             };
             reader.readAsDataURL(file);
+        } else {
+            alert("يرجى ملء جميع الحقول واختيار صورة.");
         }
     }
 
-    // 4. جلب المنتجات وعرضها للجميع تلقائياً
+    // جلب البيانات بسرعة وعرضها
     db.ref('products').on('value', (snapshot) => {
-        const data = snapshot.val();
         const display = document.getElementById('productsDisplay');
         display.innerHTML = '';
-        for(let id in data) {
-            const item = data[id];
+        snapshot.forEach((child) => {
+            const data = child.val();
             display.innerHTML += `
-                <div class="card">
-                    <button class="del-btn" onclick="deleteItem('${id}')">×</button>
-                    <img src="${item.img}">
-                    <h4>${item.name}</h4>
-                    <div class="price">${parseInt(item.price).toLocaleString()} د.ع</div>
-                    <button class="wa-btn" onclick="order('${item.name}')">اطلب الآن</button>
+                <div class="product-card">
+                    <img src="${data.image}">
+                    <h3>${data.name}</h3>
+                    <p class="price">${data.price}</p>
                 </div>
             `;
-        }
+        });
     });
-
-    function deleteItem(id) {
-        if(confirm("حذف المنتج من السيرفر؟")) db.ref('products/' + id).remove();
-    }
-
-    function order(name) {
-        window.open(`https://wa.me/9647818025533?text=${encodeURIComponent('أريد طلب: ' + name)}`);
-    }
 </script>
 </body>
 </html>
-
