@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aboud Store | نيون وأمان</title>
+    <title>Aboud Store | التحكم الشامل</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -12,64 +12,70 @@
     
     <style>
         :root { --neon: #00f2ff; --purple: #bc13fe; --bg: #050505; --card: rgba(255, 255, 255, 0.03); }
-        body { background: radial-gradient(circle at top, #111 0%, #050505 100%); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-        
-        header { background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 20px; text-align: center; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
-        .logo { font-size: 1.6rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.5)); cursor: pointer; flex: 1; }
-        
-        /* السلايدر الخرافي (بدون تخريب) */
-        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 200px; position: relative; border: 1px solid var(--neon); background: #000; box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); }
-        .slider-container img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; transform: scale(1.1); transition: opacity 1s, transform 1.5s; }
-        .slider-container img.active { opacity: 1; transform: scale(1); }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 100px; }
+        header { background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); padding: 15px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
+        .logo { font-size: 1.4rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* واجهة تسجيل الدخول الشفافة */
-        #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 6000; justify-content: center; align-items: center; }
-        .login-box { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; border: 1px solid var(--neon); width: 85%; max-width: 400px; text-align: center; }
+        /* لوحة التحكم المطورة */
+        #admin-panel { display: none; background: #0a0a0a; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 20px; position: fixed; width: 90%; z-index: 3000; top: 10%; max-height: 80vh; overflow-y: auto; box-shadow: 0 0 30px var(--neon); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
+        .btn-main { width: 100%; padding: 12px; background: var(--neon); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        .card { background: var(--card); border-radius: 25px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: center; transition: 0.3s; }
-        .card:hover { border-color: var(--neon); transform: translateY(-5px); }
+        /* السلايدر */
+        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 180px; position: relative; border: 1px solid var(--neon); background: #000; }
+        .slider-container img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; transition: 1s; }
+        .slider-container img.active { opacity: 1; }
+
+        /* الشبكة والمنتجات */
+        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
         .card img { width: 100%; border-radius: 15px; }
-        .price { color: var(--neon); font-weight: bold; margin: 10px 0; }
+        .price { color: var(--neon); font-weight: bold; margin: 5px 0; }
+        
+        .action-btns { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-cart { flex: 2; background: var(--neon); border: none; border-radius: 8px; padding: 8px; font-weight: bold; font-size: 0.8rem; }
+        .btn-social { flex: 1; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 8px; padding: 8px; text-align: center; }
 
-        #admin-panel { display: none; background: #0a0a0a; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 25px; position: fixed; width: 90%; z-index: 5000; top: 5%; max-height: 80vh; overflow-y: auto; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; font-family: 'Cairo'; }
+        .admin-tools { position: absolute; top: 8px; right: 8px; display: none; background: rgba(0,0,0,0.7); border-radius: 5px; padding: 2px; }
+        .delete-btn { color: #ff4444; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="header-icons"><a href="#" onclick="showLogin()"><i class="fas fa-user-shield"></i></a></div>
+    <i class="fas fa-user-shield" onclick="toggleAdmin()" style="color: var(--neon);"></i>
     <div class="logo">ABOUD STORE</div>
-    <div class="header-icons"><a href="https://wa.me/9647818025533"><i class="fab fa-whatsapp"></i></a></div>
+    <i class="fab fa-whatsapp" onclick="window.location.href='https://wa.me/9647818025533'" style="color: #25D366; font-size: 1.5rem;"></i>
 </header>
-
-<div id="login-modal">
-    <div class="login-box">
-        <h3 style="color: var(--neon);">تسجيل دخول آمن</h3>
-        <input type="email" id="adminEmail" placeholder="البريد الإلكتروني">
-        <input type="password" id="adminPass" placeholder="كلمة المرور">
-        <button onclick="handleLogin()" style="width:100%; padding:12px; background:var(--neon); border:none; border-radius:10px; font-weight:bold;">دخول</button>
-        <button onclick="document.getElementById('login-modal').style.display='none'" style="background:none; border:none; color:gray; margin-top:15px;">إلغاء</button>
-    </div>
-</div>
 
 <div id="admin-panel">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="margin:0; color:var(--neon);">لوحة التحكم</h3>
-        <button onclick="logout()" style="background:red; color:white; border:none; border-radius:8px; padding:5px 15px;">خروج</button>
+        <h3 style="color: var(--neon); margin:0;">لوحة التحكم</h3>
+        <button onclick="auth.signOut(); location.reload();" style="background:red; color:white; border:none; padding:5px 10px; border-radius:5px;">خروج</button>
     </div>
-    <hr style="border:0.5px solid #222;">
-    <input type="text" id="pN" placeholder="اسم المنتج">
-    <input type="text" id="pP" placeholder="السعر">
-    <textarea id="pD" placeholder="الوصف"></textarea>
-    <input type="file" id="pI">
-    <button onclick="save()" style="width:100%; padding:12px; background:var(--neon); border:none; border-radius:10px; font-weight:bold;">إضافة/تحديث</button>
-    <div id="admin-list" style="margin-top:15px;"></div>
+    
+    <select id="uploadType" onchange="updateForm()">
+        <option value="product">إضافة منتج</option>
+        <option value="ad">إضافة إعلان للسلايدر</option>
+    </select>
+
+    <div id="productFields">
+        <input type="text" id="pN" placeholder="اسم المنتج">
+        <input type="text" id="pP" placeholder="السعر">
+        <textarea id="pD" placeholder="الوصف"></textarea>
+    </div>
+    
+    <input type="file" id="pI" accept="image/*">
+    <button onclick="saveData()" id="saveBtn" class="btn-main">رفع البيانات</button>
+    
+    <div id="manage-ads" style="margin-top:20px; border-top:1px solid #222; padding-top:10px;">
+        <h4 style="color:var(--neon)">إدارة الإعلانات الحالية:</h4>
+        <div id="ads-admin-list"></div>
+    </div>
 </div>
 
 <div class="slider-container" id="ads-slider"></div>
-<div style="padding: 0 15px;"><h2 style="font-size: 1.2rem; border-right: 3px solid var(--neon); padding-right: 10px;">أحدث المنتجات</h2></div>
-<div class="products-grid" id="main-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 15px;"></div>
+<div class="products-grid" id="main-list"></div>
 
 <script>
     const firebaseConfig = {
@@ -80,67 +86,105 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // مراقبة الدخول
     auth.onAuthStateChanged(user => {
-        if (user) { document.getElementById('admin-panel').style.display = 'block'; document.getElementById('login-modal').style.display = 'none'; }
-        else { document.getElementById('admin-panel').style.display = 'none'; }
+        if (user) {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.querySelectorAll('.admin-tools').forEach(el => el.style.display = 'block');
+        }
     });
 
-    function showLogin() { if(auth.currentUser) document.getElementById('admin-panel').style.display = 'block'; else document.getElementById('login-modal').style.display = 'flex'; }
-    function handleLogin() {
-        const e = document.getElementById('adminEmail').value, p = document.getElementById('adminPass').value;
-        auth.signInWithEmailAndPassword(e, p).catch(err => alert("خطأ: " + err.message));
+    function toggleAdmin() {
+        if(!auth.currentUser) {
+            const email = prompt("الايميل:");
+            const pass = prompt("الباسورد:");
+            auth.signInWithEmailAndPassword(email, pass).catch(err => alert("خطأ في الدخول"));
+        } else {
+            const p = document.getElementById('admin-panel');
+            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        }
     }
-    function logout() { auth.signOut(); }
 
-    // جلب المنتجات (تصحيح مشكلة undefined)
-    db.ref('products').on('value', s => {
-        const l = document.getElementById('main-list'), aL = document.getElementById('admin-list');
-        l.innerHTML = ''; aL.innerHTML = '';
+    function updateForm() {
+        const type = document.getElementById('uploadType').value;
+        document.getElementById('productFields').style.display = type === 'product' ? 'block' : 'none';
+    }
+
+    // جلب الإعلانات وإدارتها
+    db.ref('ads').on('value', s => {
+        const slider = document.getElementById('ads-slider');
+        const adminAds = document.getElementById('ads-admin-list');
+        slider.innerHTML = ''; adminAds.innerHTML = '';
+        
         s.forEach(c => {
             const d = c.val(); d.id = c.key;
-            // واجهة الزبون
-            l.innerHTML += `<div class="card"><img src="${d.i}"><h4>${d.n}</h4><div class="price">${d.p} د.ع</div></div>`;
-            // واجهة الإدارة (تظهر فقط عند الدخول)
+            slider.innerHTML += `<img src="${d.i}">`;
             if(auth.currentUser) {
-                aL.innerHTML += `<div style="padding:5px; border-bottom:1px solid #222; display:flex; justify-content:space-between;">${d.n} <button onclick="db.ref('products/${d.id}').remove()" style="color:red; background:none; border:none;">حذف</button></div>`;
+                adminAds.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #222;">إعلان <span onclick="deleteItem('ads','${d.id}')" style="color:red; cursor:pointer;">حذف</span></div>`;
             }
         });
+        if(slider.firstChild) slider.firstChild.classList.add('active');
     });
 
-    // السلايدر (بدون تخريب)
-    db.ref('ads').on('value', s => {
-        const container = document.getElementById('ads-slider'); container.innerHTML = '';
+    // جلب المنتجات
+    db.ref('products').on('value', s => {
+        const list = document.getElementById('main-list');
+        list.innerHTML = '';
         s.forEach(c => {
-            const img = document.createElement('img'); img.src = c.val().i;
-            container.appendChild(img);
+            const d = c.val(); d.id = c.key;
+            const showAdmin = auth.currentUser ? 'block' : 'none';
+            list.innerHTML += `
+                <div class="card">
+                    <div class="admin-tools" style="display:${showAdmin}">
+                        <i class="fas fa-trash delete-btn" onclick="deleteItem('products','${d.id}')"></i>
+                    </div>
+                    <img src="${d.i}">
+                    <h4>${d.n}</h4>
+                    <div class="price">${d.p} د.ع</div>
+                    <div class="action-btns">
+                        <button class="btn-cart" onclick="alert('تمت الإضافة للسلة')">إضافة للسلة</button>
+                        <a href="https://wa.me/9647818025533?text=طلب: ${d.n}" class="btn-social"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>`;
         });
-        if(container.firstChild) container.firstChild.classList.add('active');
-        startSlider();
     });
 
-    function startSlider() {
-        let idx = 0;
-        setInterval(() => {
-            const imgs = document.querySelectorAll('#ads-slider img');
-            if(imgs.length > 1) {
-                imgs[idx].classList.remove('active');
-                idx = (idx + 1) % imgs.length;
-                imgs[idx].classList.add('active');
-            }
-        }, 4000);
-    }
+    function saveData() {
+        const type = document.getElementById('uploadType').value;
+        const file = document.getElementById('pI').files[0];
+        if(!file) return alert("اختر صورة");
 
-    function save() {
-        const n = document.getElementById('pN').value, p = document.getElementById('pP').value, d = document.getElementById('pD').value, file = document.getElementById('pI').files[0];
-        if(!n || !p || !file) return alert("أكمل البيانات");
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "جارِ الرفع...";
+        
         const reader = new FileReader();
         reader.onload = (e) => {
-            db.ref('products').push({ n, p, d, i: e.target.result });
-            alert("تمت الإضافة بنجاح");
+            const data = { i: e.target.result };
+            if(type === 'product') {
+                data.n = document.getElementById('pN').value;
+                data.p = document.getElementById('pP').value;
+                data.d = document.getElementById('pD').value;
+            }
+            db.ref(type === 'product' ? 'products' : 'ads').push(data).then(() => {
+                alert("تم بنجاح");
+                location.reload();
+            });
         };
         reader.readAsDataURL(file);
     }
+
+    function deleteItem(path, id) {
+        if(confirm("هل أنت متأكد من الحذف؟")) db.ref(path + '/' + id).remove();
+    }
+
+    // تشغيل السلايدر تلقائياً
+    setInterval(() => {
+        const imgs = document.querySelectorAll('.slider-container img');
+        if(imgs.length < 2) return;
+        let active = document.querySelector('.slider-container img.active');
+        active.classList.remove('active');
+        let next = active.nextElementSibling || imgs[0];
+        next.classList.add('active');
+    }, 4000);
 </script>
 </body>
 </html>
