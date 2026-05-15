@@ -11,48 +11,36 @@
     
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --card: #121212; }
-        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 80px; }
         
-        /* الهيدر */
-        header { 
-            background: rgba(0,0,0,0.95); padding: 25px; text-align: center; 
-            border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
-        }
-        .logo { font-size: 2rem; font-weight: 900; color: var(--neon); text-shadow: 0 0 15px var(--neon); cursor: pointer; }
+        header { background: rgba(0,0,0,0.9); padding: 20px; text-align: center; border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.8rem; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); cursor: pointer; }
+
+        /* شريط البحث */
+        .search-container { padding: 15px; }
+        #searchBar { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--neon); background: #111; color: white; font-family: 'Cairo'; box-sizing: border-box; }
 
         /* لوحة التحكم */
-        #admin-panel { 
-            display: none; background: #000; padding: 20px; border: 1px solid var(--neon); 
-            margin: 15px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,242,255,0.1);
-        }
-        #admin-panel h3 { margin-top: 0; color: var(--neon); border-bottom: 1px solid #333; padding-bottom: 10px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
-        .upload-btn { width: 100%; padding: 15px; background: var(--neon); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #000; margin-bottom: 20px; }
-        
-        /* قائمة الحذف */
-        .admin-item { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #222; }
-        .admin-item img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; }
-        .del-btn { background: #ff4444; border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #admin-panel { display: none; background: #000; padding: 20px; border: 1px solid var(--neon); margin: 15px; border-radius: 15px; }
+        input { width: 100%; padding: 10px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
 
         /* شبكة المنتجات */
-        .container { padding: 15px; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 15px; }
+        .card { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid #222; text-align: center; }
+        .card img { width: 100%; height: 140px; object-fit: contain; border-radius: 10px; background: #000; }
+        .price { color: var(--neon); font-weight: bold; margin: 10px 0; }
 
-        .card { 
-            background: var(--card); border-radius: 20px; padding: 12px; 
-            border: 1px solid rgba(255,255,255,0.05); text-align: center; transition: 0.3s;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--neon); }
-        .card img { width: 100%; height: 160px; object-fit: contain; border-radius: 15px; background: #000; margin-bottom: 10px; }
-        .card h3 { font-size: 0.95rem; margin: 10px 0; height: 45px; overflow: hidden; line-height: 1.4; }
-        .price { color: var(--neon); font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; }
+        /* أزرار السلة */
+        .add-cart { width: 100%; padding: 10px; background: var(--neon); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .add-cart:active { transform: scale(0.95); }
 
-        /* أزرار التواصل */
-        .order-btns { display: flex; gap: 6px; }
-        .btn { flex: 1; padding: 10px 2px; border-radius: 10px; text-decoration: none; color: white; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .btn-wa { background: #25d366; box-shadow: 0 4px 10px rgba(37,211,102,0.2); }
-        .btn-ig { background: #e1306c; box-shadow: 0 4px 10px rgba(225,48,108,0.2); }
+        /* السلة العائمة */
+        .cart-float { position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--neon); color: #000; padding: 15px; border-radius: 15px; display: none; justify-content: space-between; align-items: center; font-weight: bold; z-index: 1000; box-shadow: 0 0 20px var(--neon); }
+        .btn-send { background: #000; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
+
+        /* قائمة الحذف */
+        .admin-item { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
+        .del-btn { background: #ff4444; border: none; color: white; padding: 5px 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -60,22 +48,26 @@
 <header><div class="logo" onclick="openAdmin()">ABOUD STORE</div></header>
 
 <div id="admin-panel">
-    <h3>إضافة منتج جديد</h3>
+    <h3>إضافة منتج</h3>
     <input type="text" id="pN" placeholder="اسم الجهاز">
-    <input type="text" id="pP" placeholder="السعر (مثلاً: 450,000)">
+    <input type="text" id="pP" placeholder="السعر">
     <input type="file" id="pI" accept="image/*">
-    <button class="upload-btn" onclick="save()">نشر في الموقع</button>
-    
-    <h3 style="margin-top:20px;">إدارة المنشورات (حذف)</h3>
-    <div id="admin-list"></div>
+    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:8px; font-weight:bold;">نشر</button>
+    <div id="admin-list" style="margin-top:20px;"></div>
 </div>
 
-<div class="container">
-    <div class="products-grid" id="public-list"></div>
+<div class="search-container">
+    <input type="text" id="searchBar" placeholder="ابحث عن هاتف، سماعة، أو شاحن..." onkeyup="filterProducts()">
+</div>
+
+<div class="products-grid" id="public-list"></div>
+
+<div id="cartBar" class="cart-float">
+    <div>السلة: <span id="cartCount">0</span> قطع | المجموع: <span id="cartTotal">0</span> د.ع</div>
+    <a href="#" onclick="sendOrder()" class="btn-send"><i class="fab fa-whatsapp"></i> اطلب الآن</a>
 </div>
 
 <script>
-    // ربط الفايربيس الخاص بك
     const firebaseConfig = {
         apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s",
         authDomain: "aboud-store-f7a16.firebaseapp.com",
@@ -86,71 +78,80 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // فتح لوحة التحكم
-    function openAdmin() {
-        if(prompt("رمز المدير:") === "ABOJL2001") {
-            const panel = document.getElementById('admin-panel');
-            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
-        }
-    }
+    let cart = [];
+    let allProducts = [];
 
-    // حفظ منتج جديد
+    function openAdmin() { if(prompt("الرمز:") === "ABOJL2001") document.getElementById('admin-panel').style.display='block'; }
+
     function save() {
-        const name = document.getElementById('pN').value;
-        const price = document.getElementById('pP').value;
-        const file = document.getElementById('pI').files[0];
-        
-        if(name && price && file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                db.ref('products').push({ n: name, p: price, i: e.target.result })
-                .then(() => {
-                    alert("تم النشر!");
-                    document.getElementById('pN').value = '';
-                    document.getElementById('pP').value = '';
-                });
-            };
-            reader.readAsDataURL(file);
-        } else { alert("املأ كل الحقول أولاً!"); }
-    }
-
-    // حذف منتج
-    function remove(id) {
-        if(confirm("تريد حذف هذا المنشور؟")) {
-            db.ref('products/' + id).remove();
+        const n = document.getElementById('pN').value, p = document.getElementById('pP').value, i = document.getElementById('pI').files[0];
+        if(n && p && i) {
+            const r = new FileReader();
+            r.onload = (e) => { db.ref('products').push({ n, p, i: e.target.result }).then(() => location.reload()); };
+            r.readAsDataURL(i);
         }
     }
 
-    // تحديث البيانات تلقائياً
-    db.ref('products').on('value', snap => {
-        const publicList = document.getElementById('public-list');
-        const adminList = document.getElementById('admin-list');
-        publicList.innerHTML = ''; adminList.innerHTML = '';
-        
-        snap.forEach(child => {
-            const data = child.val();
-            const id = child.key;
+    function remove(id) { if(confirm("حذف؟")) db.ref('products/' + id).remove(); }
 
-            // كود العرض للناس
-            publicList.innerHTML += `
+    // البحث
+    function filterProducts() {
+        const query = document.getElementById('searchBar').value.toLowerCase();
+        renderProducts(allProducts.filter(p => p.n.toLowerCase().includes(query)));
+    }
+
+    // إضافة للسلة
+    function addToCart(name, price) {
+        const numPrice = parseInt(price.replace(/,/g, ''));
+        cart.push({ name, price: numPrice });
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const bar = document.getElementById('cartBar');
+        if(cart.length > 0) {
+            bar.style.display = 'flex';
+            document.getElementById('cartCount').innerText = cart.length;
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cartTotal').innerText = total.toLocaleString();
+        }
+    }
+
+    function sendOrder() {
+        let msg = "مرحباً عبود ستور، أريد طلب الآتي:%0a%0a";
+        let total = 0;
+        cart.forEach((item, index) => {
+            msg += `${index + 1}- ${item.name} (${item.price.toLocaleString()} د.ع)%0a`;
+            total += item.price;
+        });
+        msg += `%0a*الإجمالي: ${total.toLocaleString()} د.ع*`;
+        window.open(`https://wa.me/9647818025533?text=${msg}`);
+    }
+
+    function renderProducts(products) {
+        const list = document.getElementById('public-list');
+        list.innerHTML = '';
+        products.forEach(p => {
+            list.innerHTML += `
                 <div class="card">
-                    <img src="${data.i}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
-                    <h3>${data.n}</h3>
-                    <div class="price">${data.p} د.ع</div>
-                    <div class="order-btns">
-                        <a href="https://wa.me/9647818025533" class="btn btn-wa"><i class="fab fa-whatsapp"></i> واتساب</a>
-                        <a href="https://www.instagram.com/vh.rr/" class="btn btn-ig"><i class="fab fa-instagram"></i> انستا</a>
-                    </div>
-                </div>`;
-
-            // كود الحذف للمدير
-            adminList.innerHTML += `
-                <div class="admin-item">
-                    <img src="${data.i}">
-                    <span style="font-size:0.8rem">${data.n}</span>
-                    <button class="del-btn" onclick="remove('${id}')">حذف</button>
+                    <img src="${p.i}">
+                    <h3>${p.n}</h3>
+                    <div class="price">${p.p} د.ع</div>
+                    <button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button>
                 </div>`;
         });
+    }
+
+    db.ref('products').on('value', snap => {
+        allProducts = [];
+        const aList = document.getElementById('admin-list');
+        aList.innerHTML = '';
+        snap.forEach(c => {
+            const d = c.val(); d.id = c.key;
+            allProducts.push(d);
+            aList.innerHTML += `<div class="admin-item"><span>${d.n}</span><button class="del-btn" onclick="remove('${d.id}')">حذف</button></div>`;
+        });
+        renderProducts(allProducts);
     });
 </script>
 </body>
