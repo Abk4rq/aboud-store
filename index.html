@@ -12,22 +12,39 @@
     <style>
         :root { --neon: #00f2ff; --purple: #bc13fe; --bg: #050505; --card: rgba(255, 255, 255, 0.03); }
         body { background: radial-gradient(circle at top, #111 0%, #050505 100%); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-        header { background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 20px; text-align: center; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; box-shadow: 0 5px 20px rgba(0, 242, 255, 0.2); }
+        header { background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 20px; text-align: center; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
         .logo { font-size: 1.6rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.5)); cursor: pointer; flex: 1; }
-        .header-icons a { color: var(--neon); font-size: 1.4rem; transition: 0.3s; text-decoration: none; }
-        .search-container { padding: 15px; }
+        .header-icons a { color: var(--neon); font-size: 1.4rem; text-decoration: none; }
+        
+        /* شريط البحث */
+        .search-container { padding: 15px 15px 5px 15px; }
         #searchBar { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(255,255,255,0.05); color: white; outline: none; font-family: 'Cairo'; box-sizing: border-box; }
+
+        /* سلايدر الإعلانات المطور */
+        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 160px; position: relative; border: 1px solid var(--neon); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .slider-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: 1s; }
+        .slider-container img.active { opacity: 1; }
+
+        /* الأقسام */
+        .categories { display: flex; gap: 10px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; }
+        .cat-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 22px; border-radius: 30px; white-space: nowrap; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+        .cat-btn.active { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); border-color: var(--neon); }
+
+        /* المنتجات */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; padding: 15px; }
-        .card { background: var(--card); border-radius: 25px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: center; backdrop-filter: blur(5px); transition: 0.4s; }
-        .card img { width: 100%; height: 160px; object-fit: contain; border-radius: 20px; background: #000; }
-        .desc { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; display: block; min-height: 1.2em; }
-        .price { color: var(--neon); font-weight: bold; margin-bottom: 12px; font-size: 1.1rem; }
-        .add-cart { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; background: linear-gradient(45deg, var(--neon), #00a2ff); color: #000; cursor: pointer; }
+        .card { background: var(--card); border-radius: 25px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: center; transition: 0.4s; }
+        .card img { width: 100%; height: 150px; object-fit: contain; border-radius: 15px; background: #000; }
+        .desc { font-size: 0.75rem; color: #888; margin: 8px 0; display: block; height: 35px; overflow: hidden; }
+        .price { color: var(--neon); font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; }
+        .add-cart { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; background: linear-gradient(45deg, var(--neon), #0088ff); color: #000; cursor: pointer; }
+
+        /* السلة العائمة */
         .cart-wrapper { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 3000; }
-        .cart-float { background: linear-gradient(90deg, var(--neon), #0088ff); color: #000; padding: 18px; border-radius: 20px; display: none; justify-content: space-between; align-items: center; font-weight: 900; box-shadow: 0 8px 30px rgba(0, 242, 255, 0.4); cursor: pointer; }
-        .remove-item-btn { color: #ff4444; cursor: pointer; padding: 5px; margin-right: 10px; }
-        #admin-panel { display: none; background: #111; padding: 25px; border: 1px solid var(--neon); margin: 20px; border-radius: 20px; }
-        textarea, input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
+        .cart-float { background: linear-gradient(90deg, var(--neon), #0088ff); color: #000; padding: 18px; border-radius: 20px; display: none; justify-content: space-between; align-items: center; font-weight: bold; box-shadow: 0 8px 30px rgba(0, 242, 255, 0.4); cursor: pointer; }
+
+        /* لوحة التحكم */
+        #admin-panel { display: none; background: #111; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 25px; position: absolute; width: 90%; z-index: 5000; top: 10%; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -39,128 +56,145 @@
 </header>
 
 <div id="admin-panel">
-    <h3 id="formTitle" style="color:var(--neon)">إضافة منتج جديد</h3>
+    <button onclick="this.parentElement.style.display='none'" style="float:left; background:red; color:white; border:none; border-radius:50%; width:30px; height:30px;">X</button>
+    <h3 id="formTitle">إدارة المتجر</h3>
     <input type="hidden" id="editId">
-    <input type="text" id="pN" placeholder="اسم الجهاز">
-    <textarea id="pD" placeholder="وصف المنتج"></textarea>
-    <input type="text" id="pP" placeholder="السعر">
+    <input type="text" id="pN" placeholder="اسم المنتج">
+    <textarea id="pD" placeholder="وصف المختصر (ساعة، هاتف...)"></textarea>
+    <input type="text" id="pP" placeholder="السعر (مثلاً: 45,000)">
+    <select id="pC">
+        <option value="هواتف">هواتف</option>
+        <option value="سماعات">سماعات</option>
+        <option value="إكسسوارات">إكسسوارات</option>
+        <option value="شواحن">شواحن</option>
+    </select>
     <input type="file" id="pI" accept="image/*">
-    <button id="mainBtn" onclick="handleAction()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">نشر الآن</button>
-    <div id="admin-list" style="margin-top:25px;"></div>
+    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold; margin-top:10px;">حفظ المنتج</button>
+    <hr>
+    <div id="admin-list" style="max-height:200px; overflow-y:auto;"></div>
 </div>
 
 <div class="search-container">
-    <input type="text" id="searchBar" placeholder="ابحث عن هاتف أو ملحق..." onkeyup="search()">
+    <input type="text" id="searchBar" placeholder="عن ماذا تبحث اليوم؟" onkeyup="search()">
+</div>
+
+<div class="slider-container" id="ads-slider">
+    <img src="https://via.placeholder.com/800x400/000/00f2ff?text=Aboud+Store" class="active">
+</div>
+
+<div class="categories">
+    <div class="cat-btn active" onclick="filterCat('الكل', this)">الكل</div>
+    <div class="cat-btn" onclick="filterCat('هواتف', this)">هواتف</div>
+    <div class="cat-btn" onclick="filterCat('سماعات', this)">سماعات</div>
+    <div class="cat-btn" onclick="filterCat('إكسسوارات', this)">إكسسوارات</div>
+    <div class="cat-btn" onclick="filterCat('شواحن', this)">شواحن</div>
 </div>
 
 <div class="products-grid" id="main-list"></div>
 
 <div class="cart-wrapper">
-    <div id="cartDetails" style="background:rgba(10,10,10,0.95); border:1px solid var(--neon); border-radius:20px; margin-bottom:12px; display:none; max-height:300px; overflow-y:auto; padding:15px;"></div>
+    <div id="cartDetails" style="background:rgba(0,0,0,0.9); border:1px solid var(--neon); border-radius:20px; margin-bottom:10px; display:none; padding:15px;"></div>
     <div id="cartBar" class="cart-float" onclick="toggleCart()">
-        <span><i class="fas fa-shopping-bag"></i> <span id="count">0</span> قطع | <span id="total">0</span> د.ع</span>
-        <button style="background:#000; color:#fff; padding:10px 20px; border-radius:12px; border:none; font-weight:bold;" onclick="sendToWA(event)">اطلب الآن</button>
+        <span>🛒 <span id="count">0</span> قطع | <span id="total">0</span> د.ع</span>
+        <button style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:10px;" onclick="sendWA(event)">طلب الآن</button>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = {
+    const config = {
         apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s",
-        authDomain: "aboud-store-f7a16.firebaseapp.com",
-        projectId: "aboud-store-f7a16",
-        databaseURL: "https://aboud-store-f7a16-default-rtdb.firebaseio.com",
-        appId: "1:554846072421:web:214e6516b8cbf88715208c"
+        databaseURL: "https://aboud-store-f7a16-default-rtdb.firebaseio.com"
     };
-    firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(config);
     const db = firebase.database();
 
-    let cart = [], items = [];
+    let items = [], cart = [];
 
-    function checkAdmin() { if(prompt("الرمز:") === "ABOJL2001") document.getElementById('admin-panel').style.display='block'; }
+    function checkAdmin() { if(prompt("رمز الدخول:") === "ABOJL2001") document.getElementById('admin-panel').style.display='block'; }
 
-    function handleAction() {
-        const id = document.getElementById('editId').value, n = document.getElementById('pN').value, d = document.getElementById('pD').value, p = document.getElementById('pP').value, i = document.getElementById('pI').files[0];
-        if(!n || !p) return alert("املأ الاسم والسعر");
-
-        const data = { n, d, p };
+    function save() {
+        const id = document.getElementById('editId').value, n = document.getElementById('pN').value, d = document.getElementById('pD').value, p = document.getElementById('pP').value, c = document.getElementById('pC').value, i = document.getElementById('pI').files[0];
+        const data = { n, d, p, c };
         if(i) {
-            const reader = new FileReader();
-            reader.onload = (e) => { 
-                data.i = e.target.result;
-                id ? db.ref('products/'+id).update(data) : db.ref('products').push(data);
-                location.reload();
-            };
-            reader.readAsDataURL(i);
-        } else {
-            id ? db.ref('products/'+id).update(data).then(()=>location.reload()) : alert("اختر صورة");
+            const r = new FileReader();
+            r.onload = (e) => { data.i = e.target.result; id ? db.ref('products/'+id).update(data) : db.ref('products').push(data); location.reload(); };
+            r.readAsDataURL(i);
+        } else if(id) {
+            db.ref('products/'+id).update(data).then(() => location.reload());
         }
     }
 
-    function editProd(id, n, d, p) {
-        document.getElementById('editId').value = id;
-        document.getElementById('pN').value = n;
-        document.getElementById('pD').value = d;
-        document.getElementById('pP').value = p;
-        document.getElementById('formTitle').innerText = "تعديل المنتج";
-        document.getElementById('mainBtn').innerText = "حفظ التعديلات";
-        window.scrollTo(0, 0);
-    }
-
-    function deleteProd(id) { if(confirm("حذف نهائي؟")) db.ref('products/' + id).remove(); }
-
     function search() {
         const q = document.getElementById('searchBar').value.toLowerCase();
-        display(items.filter(x => x.n.toLowerCase().includes(q)));
+        render(items.filter(x => x.n.toLowerCase().includes(q)));
+    }
+
+    function filterCat(cat, btn) {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render(cat === 'الكل' ? items : items.filter(x => x.c === cat));
     }
 
     function addToCart(n, p) {
         cart.push({ n, p: parseInt(p.toString().replace(/,/g, '')) });
-        updateCart();
+        updateUI();
     }
 
-    function removeFromCart(idx, e) {
-        e.stopPropagation();
-        cart.splice(idx, 1);
-        updateCart();
-    }
-
-    function toggleCart() { const det = document.getElementById('cartDetails'); det.style.display = (det.style.display === 'block') ? 'none' : 'block'; }
-
-    function updateCart() {
+    function updateUI() {
         const bar = document.getElementById('cartBar'), det = document.getElementById('cartDetails');
         if(cart.length > 0) {
             bar.style.display = 'flex';
             document.getElementById('count').innerText = cart.length;
-            let sum = 0; det.innerHTML = '<h4 style="color:var(--neon)">السلة:</h4>';
-            cart.forEach((x, i) => { sum += x.p; det.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222;"><span>${x.n}</span><span>${x.p.toLocaleString()} <i class="fas fa-trash-alt remove-item-btn" onclick="removeFromCart(${i}, event)"></i></span></div>`; });
+            let sum = 0; det.innerHTML = '<h4>سلتك:</h4>';
+            cart.forEach((x, i) => { sum += x.p; det.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${x.n}</span><i class="fas fa-trash" style="color:red" onclick="cart.splice(${i},1);updateUI()"></i></div>`; });
             document.getElementById('total').innerText = sum.toLocaleString();
         } else { bar.style.display = 'none'; det.style.display = 'none'; }
     }
 
-    function sendToWA(e) {
+    function sendWA(e) {
         e.stopPropagation();
         let m = "طلب جديد من عبود ستور:%0a";
         cart.forEach((x, i) => m += `${i+1}- ${x.n}%0a`);
         window.open(`https://wa.me/9647818025533?text=${m}`);
     }
 
-    function display(data) {
-        const list = document.getElementById('main-list');
-        list.innerHTML = '';
+    function render(data) {
+        const l = document.getElementById('main-list'); l.innerHTML = '';
         data.forEach(p => {
-            list.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d || ''}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
+            l.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
         });
     }
 
+    function edit(id, n, d, p, c) {
+        document.getElementById('editId').value = id;
+        document.getElementById('pN').value = n;
+        document.getElementById('pD').value = d;
+        document.getElementById('pP').value = p;
+        document.getElementById('pC').value = c;
+        document.getElementById('formTitle').innerText = "تعديل المنتج";
+    }
+
     db.ref('products').on('value', s => {
-        items = [];
-        const aL = document.getElementById('admin-list'); aL.innerHTML = '';
+        items = []; const aL = document.getElementById('admin-list'); aL.innerHTML = '';
         s.forEach(c => {
             const d = c.val(); d.id = c.key; items.push(d);
-            aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333"><span>${d.n}</span><div><button onclick="editProd('${d.id}','${d.n}','${d.d}','${d.p}')" style="background:orange; color:white; border:none; border-radius:5px; margin-left:5px">تعديل</button><button onclick="deleteProd('${d.id}')" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div></div>`;
+            aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333"><span>${d.n}</span><div><button onclick="edit('${d.id}','${d.n}','${d.d}','${d.p}','${d.c}')" style="background:orange; color:white; border:none; border-radius:5px">تعديل</button> <button onclick="db.ref('products/${d.id}').remove()" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div></div>`;
         });
-        display(items);
+        render(items);
     });
+
+    function toggleCart() { const d = document.getElementById('cartDetails'); d.style.display = d.style.display === 'block' ? 'none' : 'block'; }
+    
+    // محرك السلايدر
+    let sIdx = 0;
+    setInterval(() => {
+        const imgs = document.querySelectorAll('#ads-slider img');
+        if(imgs.length > 1) {
+            imgs[sIdx].classList.remove('active');
+            sIdx = (sIdx + 1) % imgs.length;
+            imgs[sIdx].classList.add('active');
+        }
+    }, 4000);
 </script>
 </body>
 </html>
