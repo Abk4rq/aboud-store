@@ -10,239 +10,146 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root {
-            --neon-blue: #00f2ff;
-            --main-bg: #050505;
-            --glass-card: rgba(255, 255, 255, 0.08);
+        :root { --neon: #00f2ff; --bg: #050505; --card: #121212; }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* الهيدر */
+        header { 
+            background: rgba(0,0,0,0.95); padding: 25px; text-align: center; 
+            border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
         }
-        body {
-            background: var(--main-bg);
-            color: white;
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        /* الهيدر الفخم */
-        header {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(15px);
-            padding: 25px;
-            text-align: center;
-            border-bottom: 2px solid var(--neon-blue);
-            box-shadow: 0 5px 20px rgba(0, 242, 255, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px var(--neon-blue);
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .logo:hover { transform: scale(1.05); }
-
-        /* حاوية المنتجات */
-        .container { padding: 20px 10px; }
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-            gap: 15px;
-        }
-
-        /* كارت المنتج */
-        .product-card {
-            background: var(--glass-card);
-            border-radius: 20px;
-            padding: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .product-card:hover {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
-            transform: translateY(-8px);
-        }
-        .product-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: contain;
-            border-radius: 15px;
-            background: #111;
-        }
-        .product-card h3 {
-            font-size: 1rem;
-            margin: 12px 0 5px;
-            color: #efefef;
-        }
-        .price {
-            color: var(--neon-blue);
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        /* أزرار الطلب */
-        .order-actions {
-            display: flex;
-            gap: 6px;
-        }
-        .btn {
-            flex: 1;
-            padding: 10px 5px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        .btn-wa { background: #25d366; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
-        .btn-ig { background: #e1306c; box-shadow: 0 4px 10px rgba(225, 48, 108, 0.3); }
+        .logo { font-size: 2rem; font-weight: 900; color: var(--neon); text-shadow: 0 0 15px var(--neon); cursor: pointer; }
 
         /* لوحة التحكم */
-        #adminPanel {
-            display: none;
-            background: rgba(0,0,0,0.95);
-            padding: 25px;
-            border-radius: 25px;
-            border: 2px solid var(--neon-blue);
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%;
-            z-index: 2000;
+        #admin-panel { 
+            display: none; background: #000; padding: 20px; border: 1px solid var(--neon); 
+            margin: 15px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,242,255,0.1);
         }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 10px;
-            box-sizing: border-box;
+        #admin-panel h3 { margin-top: 0; color: var(--neon); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
+        .upload-btn { width: 100%; padding: 15px; background: var(--neon); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #000; margin-bottom: 20px; }
+        
+        /* قائمة الحذف */
+        .admin-item { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #222; }
+        .admin-item img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; }
+        .del-btn { background: #ff4444; border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* شبكة المنتجات */
+        .container { padding: 15px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; }
+
+        .card { 
+            background: var(--card); border-radius: 20px; padding: 12px; 
+            border: 1px solid rgba(255,255,255,0.05); text-align: center; transition: 0.3s;
         }
-        .add-now {
-            background: var(--neon-blue);
-            color: black;
-            font-weight: bold;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            cursor: pointer;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1500;
-        }
+        .card:hover { transform: translateY(-5px); border-color: var(--neon); }
+        .card img { width: 100%; height: 160px; object-fit: contain; border-radius: 15px; background: #000; margin-bottom: 10px; }
+        .card h3 { font-size: 0.95rem; margin: 10px 0; height: 45px; overflow: hidden; line-height: 1.4; }
+        .price { color: var(--neon); font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; }
+
+        /* أزرار التواصل */
+        .order-btns { display: flex; gap: 6px; }
+        .btn { flex: 1; padding: 10px 2px; border-radius: 10px; text-decoration: none; color: white; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .btn-wa { background: #25d366; box-shadow: 0 4px 10px rgba(37,211,102,0.2); }
+        .btn-ig { background: #e1306c; box-shadow: 0 4px 10px rgba(225,48,108,0.2); }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo" onclick="openAdmin()">ABOUD STORE</div>
-</header>
+<header><div class="logo" onclick="openAdmin()">ABOUD STORE</div></header>
 
-<div class="overlay" id="overlay" onclick="closeAdmin()"></div>
-
-<div id="adminPanel">
-    <h2 style="text-align:center; color:var(--neon-blue);">إضافة منتج جديد</h2>
-    <input type="text" id="pName" placeholder="اسم الجهاز">
-    <input type="text" id="pPrice" placeholder="السعر (مثلاً: 450,000)">
-    <input type="file" id="pImg" accept="image/*">
-    <button class="add-now" onclick="saveProduct()">نشر في الموقع</button>
+<div id="admin-panel">
+    <h3>إضافة منتج جديد</h3>
+    <input type="text" id="pN" placeholder="اسم الجهاز">
+    <input type="text" id="pP" placeholder="السعر (مثلاً: 450,000)">
+    <input type="file" id="pI" accept="image/*">
+    <button class="upload-btn" onclick="save()">نشر في الموقع</button>
+    
+    <h3 style="margin-top:20px;">إدارة المنشورات (حذف)</h3>
+    <div id="admin-list"></div>
 </div>
 
 <div class="container">
-    <div class="products-grid" id="productsList">
-        </div>
+    <div class="products-grid" id="public-list"></div>
 </div>
 
 <script>
-    // إعدادات Firebase الخاصة بك
+    // ربط الفايربيس الخاص بك
     const firebaseConfig = {
         apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s",
         authDomain: "aboud-store-f7a16.firebaseapp.com",
         projectId: "aboud-store-f7a16",
-        storageBucket: "aboud-store-f7a16.firebasestorage.app",
-        messagingSenderId: "554846072421",
+        databaseURL: "https://aboud-store-f7a16-default-rtdb.firebaseio.com",
         appId: "1:554846072421:web:214e6516b8cbf88715208c"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // فتح لوحة التحكم
     function openAdmin() {
-        const pass = prompt("أدخل رمز الإدارة:");
-        if(pass === "ABOJL2001") { // الرمز الجديد
-            document.getElementById('adminPanel').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
+        if(prompt("رمز المدير:") === "ABOJL2001") {
+            const panel = document.getElementById('admin-panel');
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
         }
     }
 
-    function closeAdmin() {
-        document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    function saveProduct() {
-        const name = document.getElementById('pName').value;
-        const price = document.getElementById('pPrice').value;
-        const file = document.getElementById('pImg').files[0];
-
+    // حفظ منتج جديد
+    function save() {
+        const name = document.getElementById('pN').value;
+        const price = document.getElementById('pP').value;
+        const file = document.getElementById('pI').files[0];
+        
         if(name && price && file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                db.ref('products').push({
-                    name: name,
-                    price: price,
-                    image: e.target.result
-                }).then(() => {
-                    alert("تمت الإضافة بنجاح!");
-                    location.reload();
+            reader.onload = (e) => {
+                db.ref('products').push({ n: name, p: price, i: e.target.result })
+                .then(() => {
+                    alert("تم النشر!");
+                    document.getElementById('pN').value = '';
+                    document.getElementById('pP').value = '';
                 });
             };
             reader.readAsDataURL(file);
+        } else { alert("املأ كل الحقول أولاً!"); }
+    }
+
+    // حذف منتج
+    function remove(id) {
+        if(confirm("تريد حذف هذا المنشور؟")) {
+            db.ref('products/' + id).remove();
         }
     }
 
-    // عرض المنتجات وتفعيل أزرار واتساب وانستا
-    db.ref('products').on('value', (snapshot) => {
-        const list = document.getElementById('productsList');
-        list.innerHTML = '';
-        snapshot.forEach((child) => {
+    // تحديث البيانات تلقائياً
+    db.ref('products').on('value', snap => {
+        const publicList = document.getElementById('public-list');
+        const adminList = document.getElementById('admin-list');
+        publicList.innerHTML = ''; adminList.innerHTML = '';
+        
+        snap.forEach(child => {
             const data = child.val();
-            // رقم الهاتف واليوزر الخاص بك
-            const waLink = `https://wa.me/9647818025533?text=مرحباً عبود، أريد استفسر عن: ${data.name}`;
-            const igLink = `https://www.instagram.com/vh.rr/`;
+            const id = child.key;
 
-            list.innerHTML += `
-                <div class="product-card">
-                    <img src="${data.image}" loading="lazy">
-                    <h3>${data.name}</h3>
-                    <div class="price">${data.price} د.ع</div>
-                    <div class="order-actions">
-                        <a href="${waLink}" target="_blank" class="btn btn-wa"><i class="fab fa-whatsapp"></i> واتساب</a>
-                        <a href="${igLink}" target="_blank" class="btn btn-ig"><i class="fab fa-instagram"></i> انستا</a>
+            // كود العرض للناس
+            publicList.innerHTML += `
+                <div class="card">
+                    <img src="${data.i}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                    <h3>${data.n}</h3>
+                    <div class="price">${data.p} د.ع</div>
+                    <div class="order-btns">
+                        <a href="https://wa.me/9647818025533" class="btn btn-wa"><i class="fab fa-whatsapp"></i> واتساب</a>
+                        <a href="https://www.instagram.com/vh.rr/" class="btn btn-ig"><i class="fab fa-instagram"></i> انستا</a>
                     </div>
-                </div>
-            `;
+                </div>`;
+
+            // كود الحذف للمدير
+            adminList.innerHTML += `
+                <div class="admin-item">
+                    <img src="${data.i}">
+                    <span style="font-size:0.8rem">${data.n}</span>
+                    <button class="del-btn" onclick="remove('${id}')">حذف</button>
+                </div>`;
         });
     });
 </script>
