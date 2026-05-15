@@ -11,75 +11,96 @@
     
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --card: #121212; }
-        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 80px; }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 100px; }
         
-        header { background: rgba(0,0,0,0.9); padding: 20px; text-align: center; border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.8rem; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); cursor: pointer; }
+        /* الهيدر مع الأيقونات الجانبية */
+        header { 
+            background: rgba(0,0,0,0.9); padding: 15px; text-align: center; 
+            border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-icons { font-size: 1.2rem; color: var(--neon); display: flex; gap: 15px; width: 60px; }
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); flex: 1; cursor: pointer; }
 
         /* شريط البحث */
         .search-container { padding: 15px; }
-        #searchBar { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--neon); background: #111; color: white; font-family: 'Cairo'; box-sizing: border-box; }
+        #searchBar { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--neon); background: #111; color: white; font-family: 'Cairo'; box-sizing: border-box; outline: none; }
+
+        /* شبكة المنتجات */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; padding: 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .card img { width: 100%; height: 150px; object-fit: contain; border-radius: 15px; background: #000; }
+        .price { color: var(--neon); font-weight: bold; margin: 10px 0; font-size: 1.1rem; }
+        .add-cart { width: 100%; padding: 12px; background: var(--neon); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        /* السلة المطورة */
+        .cart-wrapper { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 2000; }
+        .cart-float { 
+            background: var(--neon); color: #000; padding: 15px; border-radius: 15px; 
+            display: none; justify-content: space-between; align-items: center; font-weight: bold;
+            box-shadow: 0 0 25px var(--neon); cursor: pointer;
+        }
+        .cart-items-list { 
+            background: #111; border: 1px solid var(--neon); border-radius: 15px; 
+            margin-bottom: 10px; display: none; max-height: 250px; overflow-y: auto; padding: 10px;
+        }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #222; font-size: 0.85rem; }
+        .remove-item { color: #ff4444; cursor: pointer; padding: 5px; }
+        .btn-send { background: #000; color: #fff; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; border: none; font-weight: bold; }
 
         /* لوحة التحكم */
         #admin-panel { display: none; background: #000; padding: 20px; border: 1px solid var(--neon); margin: 15px; border-radius: 15px; }
         input { width: 100%; padding: 10px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
-
-        /* شبكة المنتجات */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 15px; }
-        .card { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid #222; text-align: center; }
-        .card img { width: 100%; height: 140px; object-fit: contain; border-radius: 10px; background: #000; }
-        .price { color: var(--neon); font-weight: bold; margin: 10px 0; }
-
-        /* أزرار السلة */
-        .add-cart { width: 100%; padding: 10px; background: var(--neon); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .add-cart:active { transform: scale(0.95); }
-
-        /* السلة العائمة */
-        .cart-float { position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--neon); color: #000; padding: 15px; border-radius: 15px; display: none; justify-content: space-between; align-items: center; font-weight: bold; z-index: 1000; box-shadow: 0 0 20px var(--neon); }
-        .btn-send { background: #000; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
-
-        /* قائمة الحذف */
-        .admin-item { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
-        .del-btn { background: #ff4444; border: none; color: white; padding: 5px 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<header><div class="logo" onclick="openAdmin()">ABOUD STORE</div></header>
+<header>
+    <div class="header-icons">
+        <a href="https://wa.me/9647818025533" style="color:inherit"><i class="fab fa-whatsapp"></i></a>
+    </div>
+    <div class="logo" onclick="openAdmin()">ABOUD STORE</div>
+    <div class="header-icons" style="justify-content: flex-end;">
+        <a href="https://www.instagram.com/vh.rr/" style="color:inherit"><i class="fab fa-instagram"></i></a>
+    </div>
+</header>
 
 <div id="admin-panel">
     <h3>إضافة منتج</h3>
     <input type="text" id="pN" placeholder="اسم الجهاز">
     <input type="text" id="pP" placeholder="السعر">
     <input type="file" id="pI" accept="image/*">
-    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:8px; font-weight:bold;">نشر</button>
+    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:8px; font-weight:bold;">نشر الآن</button>
     <div id="admin-list" style="margin-top:20px;"></div>
 </div>
 
 <div class="search-container">
-    <input type="text" id="searchBar" placeholder="ابحث عن هاتف، سماعة، أو شاحن..." onkeyup="filterProducts()">
+    <input type="text" id="searchBar" placeholder="ابحث عن هاتف أو ملحق..." onkeyup="filter()">
 </div>
 
-<div class="products-grid" id="public-list"></div>
+<div class="products-grid" id="list"></div>
 
-<div id="cartBar" class="cart-float">
-    <div>السلة: <span id="cartCount">0</span> قطع | المجموع: <span id="cartTotal">0</span> د.ع</div>
-    <a href="#" onclick="sendOrder()" class="btn-send"><i class="fab fa-whatsapp"></i> اطلب الآن</a>
+<div class="cart-wrapper">
+    <div id="cartItemsList" class="cart-items-list"></div>
+    <div id="cartBar" class="cart-float" onclick="toggleCartItems()">
+        <div><i class="fas fa-shopping-basket"></i> <span id="cCount">0</span> قطع | <span id="cTotal">0</span> د.ع</div>
+        <button onclick="sendOrder(event)" class="btn-send">اطلب الآن</button>
+    </div>
 </div>
 
 <script>
-    const firebaseConfig = {
+    const config = {
         apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s",
         authDomain: "aboud-store-f7a16.firebaseapp.com",
         projectId: "aboud-store-f7a16",
         databaseURL: "https://aboud-store-f7a16-default-rtdb.firebaseio.com",
         appId: "1:554846072421:web:214e6516b8cbf88715208c"
     };
-    firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(config);
     const db = firebase.database();
 
     let cart = [];
-    let allProducts = [];
+    let allP = [];
 
     function openAdmin() { if(prompt("الرمز:") === "ABOJL2001") document.getElementById('admin-panel').style.display='block'; }
 
@@ -92,47 +113,70 @@
         }
     }
 
-    function remove(id) { if(confirm("حذف؟")) db.ref('products/' + id).remove(); }
+    function removeProduct(id) { if(confirm("حذف المنتج نهائياً؟")) db.ref('products/' + id).remove(); }
 
-    // البحث
-    function filterProducts() {
-        const query = document.getElementById('searchBar').value.toLowerCase();
-        renderProducts(allProducts.filter(p => p.n.toLowerCase().includes(query)));
+    function filter() {
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        render(allP.filter(x => x.n.toLowerCase().includes(q)));
     }
 
-    // إضافة للسلة
-    function addToCart(name, price) {
-        const numPrice = parseInt(price.replace(/,/g, ''));
-        cart.push({ name, price: numPrice });
-        updateCartUI();
+    function addToCart(n, p) {
+        const price = parseInt(p.replace(/,/g, ''));
+        cart.push({ n, price, id: Date.now() });
+        updateUI();
     }
 
-    function updateCartUI() {
+    function removeFromCart(index, event) {
+        event.stopPropagation();
+        cart.splice(index, 1);
+        updateUI();
+    }
+
+    function toggleCartItems() {
+        const list = document.getElementById('cartItemsList');
+        list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function updateUI() {
         const bar = document.getElementById('cartBar');
+        const list = document.getElementById('cartItemsList');
         if(cart.length > 0) {
             bar.style.display = 'flex';
-            document.getElementById('cartCount').innerText = cart.length;
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            document.getElementById('cartTotal').innerText = total.toLocaleString();
+            document.getElementById('cCount').innerText = cart.length;
+            let total = 0;
+            list.innerHTML = '<h4 style="margin:5px; color:var(--neon)">محتويات السلة:</h4>';
+            cart.forEach((item, index) => {
+                total += item.price;
+                list.innerHTML += `
+                    <div class="cart-item">
+                        <span>${item.n}</span>
+                        <span>${item.price.toLocaleString()} <i class="fas fa-trash remove-item" onclick="removeFromCart(${index}, event)"></i></span>
+                    </div>`;
+            });
+            document.getElementById('cTotal').innerText = total.toLocaleString();
+        } else {
+            bar.style.display = 'none';
+            list.style.display = 'none';
         }
     }
 
-    function sendOrder() {
-        let msg = "مرحباً عبود ستور، أريد طلب الآتي:%0a%0a";
+    function sendOrder(e) {
+        e.stopPropagation();
+        let msg = "طلب جديد من عبود ستور:%0a%0a";
         let total = 0;
-        cart.forEach((item, index) => {
-            msg += `${index + 1}- ${item.name} (${item.price.toLocaleString()} د.ع)%0a`;
+        cart.forEach((item, idx) => {
+            msg += `${idx+1}- ${item.n} (${item.price.toLocaleString()} د.ع)%0a`;
             total += item.price;
         });
         msg += `%0a*الإجمالي: ${total.toLocaleString()} د.ع*`;
         window.open(`https://wa.me/9647818025533?text=${msg}`);
     }
 
-    function renderProducts(products) {
-        const list = document.getElementById('public-list');
-        list.innerHTML = '';
-        products.forEach(p => {
-            list.innerHTML += `
+    function render(data) {
+        const l = document.getElementById('list');
+        l.innerHTML = '';
+        data.forEach(p => {
+            l.innerHTML += `
                 <div class="card">
                     <img src="${p.i}">
                     <h3>${p.n}</h3>
@@ -142,16 +186,16 @@
         });
     }
 
-    db.ref('products').on('value', snap => {
-        allProducts = [];
-        const aList = document.getElementById('admin-list');
-        aList.innerHTML = '';
-        snap.forEach(c => {
+    db.ref('products').on('value', s => {
+        allP = [];
+        const aL = document.getElementById('admin-list');
+        aL.innerHTML = '';
+        s.forEach(c => {
             const d = c.val(); d.id = c.key;
-            allProducts.push(d);
-            aList.innerHTML += `<div class="admin-item"><span>${d.n}</span><button class="del-btn" onclick="remove('${d.id}')">حذف</button></div>`;
+            allP.push(d);
+            aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #222"><span>${d.n}</span><button onclick="removeProduct('${d.id}')" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div>`;
         });
-        renderProducts(allProducts);
+        render(allP);
     });
 </script>
 </body>
