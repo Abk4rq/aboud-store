@@ -16,35 +16,33 @@
         .logo { font-size: 1.6rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.5)); cursor: pointer; flex: 1; }
         .header-icons a { color: var(--neon); font-size: 1.4rem; text-decoration: none; }
         
-        /* شريط البحث */
         .search-container { padding: 15px 15px 5px 15px; }
         #searchBar { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(255,255,255,0.05); color: white; outline: none; font-family: 'Cairo'; box-sizing: border-box; }
 
         /* سلايدر الإعلانات المطور */
-        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 160px; position: relative; border: 1px solid var(--neon); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 180px; position: relative; border: 1px solid var(--neon); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); background: #000; }
         .slider-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: 1s; }
         .slider-container img.active { opacity: 1; }
 
-        /* الأقسام */
         .categories { display: flex; gap: 10px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; }
         .cat-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 22px; border-radius: 30px; white-space: nowrap; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
         .cat-btn.active { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); border-color: var(--neon); }
 
-        /* المنتجات */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; padding: 15px; }
         .card { background: var(--card); border-radius: 25px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: center; transition: 0.4s; }
         .card img { width: 100%; height: 150px; object-fit: contain; border-radius: 15px; background: #000; }
-        .desc { font-size: 0.75rem; color: #888; margin: 8px 0; display: block; height: 35px; overflow: hidden; }
+        
+        /* تعديل الوصف ليظهر كاملاً */
+        .desc { font-size: 0.8rem; color: #aaa; margin: 10px 0; display: block; word-wrap: break-word; line-height: 1.5; }
+        
         .price { color: var(--neon); font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; }
         .add-cart { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; background: linear-gradient(45deg, var(--neon), #0088ff); color: #000; cursor: pointer; }
 
-        /* السلة العائمة */
         .cart-wrapper { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 3000; }
         .cart-float { background: linear-gradient(90deg, var(--neon), #0088ff); color: #000; padding: 18px; border-radius: 20px; display: none; justify-content: space-between; align-items: center; font-weight: bold; box-shadow: 0 8px 30px rgba(0, 242, 255, 0.4); cursor: pointer; }
 
-        /* لوحة التحكم */
-        #admin-panel { display: none; background: #111; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 25px; position: absolute; width: 90%; z-index: 5000; top: 10%; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; }
+        #admin-panel { display: none; background: #111; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 25px; position: absolute; width: 90%; z-index: 5000; top: 10%; box-sizing: border-box; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
     </style>
 </head>
 <body>
@@ -60,8 +58,8 @@
     <h3 id="formTitle">إدارة المتجر</h3>
     <input type="hidden" id="editId">
     <input type="text" id="pN" placeholder="اسم المنتج">
-    <textarea id="pD" placeholder="وصف المختصر (ساعة، هاتف...)"></textarea>
-    <input type="text" id="pP" placeholder="السعر (مثلاً: 45,000)">
+    <textarea id="pD" placeholder="الوصف الكامل للمنتج"></textarea>
+    <input type="text" id="pP" placeholder="السعر">
     <select id="pC">
         <option value="هواتف">هواتف</option>
         <option value="سماعات">سماعات</option>
@@ -69,18 +67,19 @@
         <option value="شواحن">شواحن</option>
     </select>
     <input type="file" id="pI" accept="image/*">
-    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold; margin-top:10px;">حفظ المنتج</button>
+    <button onclick="save()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold;">حفظ المنتج</button>
     <hr>
-    <div id="admin-list" style="max-height:200px; overflow-y:auto;"></div>
+    <h4 style="color:var(--neon)">إضافة إعلان للسلايدر:</h4>
+    <input type="file" id="adI" accept="image/*">
+    <button onclick="uploadAd()" style="width:100%; padding:10px; background:white; color:black; border:none; border-radius:10px; font-weight:bold;">رفع الإعلان</button>
+    <div id="admin-list" style="max-height:200px; overflow-y:auto; margin-top:20px;"></div>
 </div>
 
 <div class="search-container">
     <input type="text" id="searchBar" placeholder="عن ماذا تبحث اليوم؟" onkeyup="search()">
 </div>
 
-<div class="slider-container" id="ads-slider">
-    <img src="https://via.placeholder.com/800x400/000/00f2ff?text=Aboud+Store" class="active">
-</div>
+<div class="slider-container" id="ads-slider"></div>
 
 <div class="categories">
     <div class="cat-btn active" onclick="filterCat('الكل', this)">الكل</div>
@@ -124,22 +123,52 @@
         }
     }
 
-    function search() {
-        const q = document.getElementById('searchBar').value.toLowerCase();
-        render(items.filter(x => x.n.toLowerCase().includes(q)));
+    function uploadAd() {
+        const i = document.getElementById('adI').files[0];
+        if(i) {
+            const r = new FileReader();
+            r.onload = (e) => { db.ref('ads').push({ i: e.target.result }).then(() => location.reload()); };
+            r.readAsDataURL(i);
+        }
     }
 
-    function filterCat(cat, btn) {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render(cat === 'الكل' ? items : items.filter(x => x.c === cat));
+    function renderAds(ads) {
+        const container = document.getElementById('ads-slider');
+        container.innerHTML = '';
+        if(Object.keys(ads).length === 0) {
+            container.innerHTML = '<img src="https://via.placeholder.com/800x400/000/00f2ff?text=Aboud+Store" class="active">';
+            return;
+        }
+        let first = true;
+        for(let key in ads) {
+            const img = document.createElement('img');
+            img.src = ads[key].i;
+            if(first) { img.classList.add('active'); first = false; }
+            container.appendChild(img);
+        }
     }
 
-    function addToCart(n, p) {
-        cart.push({ n, p: parseInt(p.toString().replace(/,/g, '')) });
-        updateUI();
+    db.ref('ads').on('value', s => { if(s.exists()) renderAds(s.val()); });
+
+    function render(data) {
+        const l = document.getElementById('main-list'); l.innerHTML = '';
+        data.forEach(p => {
+            l.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d || ''}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
+        });
     }
 
+    db.ref('products').on('value', s => {
+        items = []; const aL = document.getElementById('admin-list'); aL.innerHTML = '';
+        s.forEach(c => {
+            const d = c.val(); d.id = c.key; items.push(d);
+            aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333"><span>${d.n}</span><div><button onclick="db.ref('products/${d.id}').remove()" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div></div>`;
+        });
+        render(items);
+    });
+
+    function search() { const q = document.getElementById('searchBar').value.toLowerCase(); render(items.filter(x => x.n.toLowerCase().includes(q))); }
+    function filterCat(cat, btn) { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(cat === 'الكل' ? items : items.filter(x => x.c === cat)); }
+    function addToCart(n, p) { cart.push({ n, p: parseInt(p.toString().replace(/,/g, '')) }); updateUI(); }
     function updateUI() {
         const bar = document.getElementById('cartBar'), det = document.getElementById('cartDetails');
         if(cart.length > 0) {
@@ -150,42 +179,9 @@
             document.getElementById('total').innerText = sum.toLocaleString();
         } else { bar.style.display = 'none'; det.style.display = 'none'; }
     }
-
-    function sendWA(e) {
-        e.stopPropagation();
-        let m = "طلب جديد من عبود ستور:%0a";
-        cart.forEach((x, i) => m += `${i+1}- ${x.n}%0a`);
-        window.open(`https://wa.me/9647818025533?text=${m}`);
-    }
-
-    function render(data) {
-        const l = document.getElementById('main-list'); l.innerHTML = '';
-        data.forEach(p => {
-            l.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
-        });
-    }
-
-    function edit(id, n, d, p, c) {
-        document.getElementById('editId').value = id;
-        document.getElementById('pN').value = n;
-        document.getElementById('pD').value = d;
-        document.getElementById('pP').value = p;
-        document.getElementById('pC').value = c;
-        document.getElementById('formTitle').innerText = "تعديل المنتج";
-    }
-
-    db.ref('products').on('value', s => {
-        items = []; const aL = document.getElementById('admin-list'); aL.innerHTML = '';
-        s.forEach(c => {
-            const d = c.val(); d.id = c.key; items.push(d);
-            aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333"><span>${d.n}</span><div><button onclick="edit('${d.id}','${d.n}','${d.d}','${d.p}','${d.c}')" style="background:orange; color:white; border:none; border-radius:5px">تعديل</button> <button onclick="db.ref('products/${d.id}').remove()" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div></div>`;
-        });
-        render(items);
-    });
-
+    function sendWA(e) { e.stopPropagation(); let m = "طلب جديد من عبود ستور:%0a"; cart.forEach((x, i) => m += `${i+1}- ${x.n}%0a`); window.open(`https://wa.me/9647818025533?text=${m}`); }
     function toggleCart() { const d = document.getElementById('cartDetails'); d.style.display = d.style.display === 'block' ? 'none' : 'block'; }
     
-    // محرك السلايدر
     let sIdx = 0;
     setInterval(() => {
         const imgs = document.querySelectorAll('#ads-slider img');
