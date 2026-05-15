@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aboud Store | المتجر المتكامل</title>
+    <title>Aboud Store | الإدارة المتكاملة</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -12,179 +12,169 @@
     
     <style>
         :root { --neon: #00f2ff; --purple: #bc13fe; --bg: #050505; --card: rgba(255, 255, 255, 0.03); }
-        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 100px; }
-        header { background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); padding: 15px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 120px; }
+        
+        header { background: rgba(0,0,0,0.9); padding: 15px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .logo { font-size: 1.4rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* لوحة التحكم */
-        #admin-panel { display: none; background: #0a0a0a; padding: 20px; border: 2px solid var(--neon); margin: 15px; border-radius: 20px; position: fixed; width: 90%; z-index: 3000; top: 10%; max-height: 80vh; overflow-y: auto; box-shadow: 0 0 30px var(--neon); }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
-
-        /* السلة المنبثقة */
-        #cart-modal { display: none; position: fixed; bottom: 80px; left: 5%; width: 90%; background: #111; border: 1px solid var(--neon); border-radius: 20px; padding: 15px; z-index: 4000; max-height: 50vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
-        
-        /* أيقونة السلة العائمة */
-        .cart-fab { position: fixed; bottom: 20px; left: 20px; background: var(--neon); color: black; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 2500; cursor: pointer; box-shadow: 0 0 20px var(--neon); }
-        .cart-count { position: absolute; top: 0; right: 0; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+        /* لوحة الإدارة بنمط "فلات" - ثابتة ومريحة */
+        #admin-section { display: none; background: #0a0a0a; padding: 20px; border-bottom: 1px solid #222; margin-bottom: 20px; }
+        .admin-card { max-width: 500px; margin: 0 auto; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; font-family: 'Cairo'; }
+        .btn-pub { width: 100%; padding: 12px; background: var(--neon); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-logout { background: #ff4444; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
 
         /* السلايدر والمنتجات */
-        .slider-container { margin: 15px; border-radius: 20px; overflow: hidden; height: 180px; position: relative; border: 1px solid var(--neon); }
-        .slider-container img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; transition: 0.8s; }
-        .slider-container img.active { opacity: 1; }
-        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+        .slider { margin: 15px; border-radius: 15px; overflow: hidden; height: 160px; position: relative; border: 1px solid var(--neon); }
+        .slider img { width: 100%; height: 100%; object-fit: contain; position: absolute; opacity: 0; transition: 0.5s; }
+        .slider img.active { opacity: 1; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
         .card { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
         .card img { width: 100%; border-radius: 10px; }
-        .price { color: var(--neon); font-weight: bold; margin: 5px 0; }
-        .admin-tools { position: absolute; top: 5px; right: 5px; display: none; }
+        .price { color: var(--neon); font-weight: 700; margin: 5px 0; font-size: 1.1rem; }
+        
+        .del-icon { position: absolute; top: 10px; right: 10px; color: #ff4444; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 50%; display: none; cursor: pointer; }
+
+        /* نظام السلة الجديد - عائم وبسيط */
+        .cart-toggle { position: fixed; bottom: 25px; left: 25px; background: var(--neon); color: black; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; z-index: 2000; box-shadow: 0 0 15px var(--neon); cursor: pointer; }
+        .badge { position: absolute; top: 0; right: 0; background: red; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+
+        #cart-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <header>
-    <i class="fas fa-user-shield" onclick="toggleAdmin()" style="color: var(--neon);"></i>
+    <i class="fas fa-user-lock" onclick="login()" style="color: var(--neon); cursor: pointer;"></i>
     <div class="logo">ABOUD STORE</div>
-    <div style="width: 30px;"></div>
+    <div style="width:20px"></div>
 </header>
 
-<div id="admin-panel">
-    <div style="display:flex; justify-content:space-between;">
-        <h3 style="color:var(--neon)">الإدارة</h3>
-        <button onclick="auth.signOut(); location.reload();" style="background:red; border:none; color:white; border-radius:5px;">خروج</button>
+<section id="admin-section">
+    <div class="admin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; color:var(--neon)">لوحة الإدارة</h3>
+            <button class="btn-logout" onclick="auth.signOut(); location.reload();">خروج</button>
+        </div>
+        <select id="mode" onchange="document.getElementById('pInfo').style.display = this.value=='p'?'block':'none'">
+            <option value="p">إضافة منتج</option>
+            <option value="a">إضافة إعلان</option>
+        </select>
+        <div id="pInfo">
+            <input type="text" id="pName" placeholder="اسم المنتج">
+            <input type="text" id="pPrice" placeholder="السعر">
+        </div>
+        <input type="file" id="pFile" accept="image/*">
+        <button id="pBtn" onclick="upload()" class="btn-pub">نشر الآن</button>
+        <div id="adsManage" style="margin-top:15px; border-top:1px solid #222; padding-top:10px;"></div>
     </div>
-    <select id="type" onchange="document.getElementById('pFields').style.display = this.value=='p'?'block':'none'">
-        <option value="p">منتج جديد</option>
-        <option value="a">إعلان جديد</option>
-    </select>
-    <div id="pFields">
-        <input type="text" id="name" placeholder="الاسم">
-        <input type="text" id="price" placeholder="السعر">
-    </div>
-    <input type="file" id="file" accept="image/*">
-    <button onclick="upload()" id="upBtn" style="width:100%; padding:12px; background:var(--neon); border:none; border-radius:10px; margin-top:10px;">نشر</button>
-    <div id="adsList" style="margin-top:20px;"></div>
+</section>
+
+<div class="slider" id="slider"></div>
+<div class="grid" id="main-grid"></div>
+
+<div class="cart-toggle" onclick="showCart()">
+    <i class="fas fa-shopping-cart"></i>
+    <div class="badge" id="bCount">0</div>
 </div>
 
-<div class="slider-container" id="slider"></div>
-<div class="products-grid" id="list"></div>
-
-<div class="cart-fab" onclick="document.getElementById('cart-modal').style.display='block'">
-    <i class="fas fa-shopping-basket"></i>
-    <div class="cart-count" id="count">0</div>
-</div>
-
-<div id="cart-modal">
-    <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--neon); padding-bottom:10px;">
-        <h3 style="margin:0">سلة المشتريات</h3>
-        <i class="fas fa-times" onclick="document.getElementById('cart-modal').style.display='none'"></i>
+<div id="cart-view">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--neon); padding-bottom:15px;">
+        <h2>سلة الطلبات</h2>
+        <i class="fas fa-times" onclick="showCart()" style="font-size:1.5rem"></i>
     </div>
-    <div id="cart-items"></div>
-    <button onclick="sendOrder()" style="width:100%; background:#25D366; color:white; border:none; padding:12px; border-radius:10px; margin-top:15px; font-weight:bold;">اطلب الآن عبر واتساب</button>
+    <div id="cart-items" style="margin-top:20px;"></div>
+    <button onclick="orderNow()" style="width:100%; background:#25D366; color:white; border:none; padding:15px; border-radius:10px; margin-top:30px; font-weight:bold; font-size:1.1rem;">إرسال عبر واتساب <i class="fab fa-whatsapp"></i></button>
 </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s", databaseURL: "https://aboud-store-f7a16-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth(), db = firebase.database();
-    let cart = [];
+    let myCart = [];
 
+    // التحكم في ظهور لوحة الإدارة والملفات
     auth.onAuthStateChanged(user => {
         if(user) {
-            document.getElementById('admin-panel').style.display = 'block';
-            document.querySelectorAll('.admin-tools').forEach(e => e.style.display = 'block');
+            document.getElementById('admin-section').style.display = 'block';
+            document.querySelectorAll('.del-icon').forEach(e => e.style.display = 'block');
         }
     });
 
-    function toggleAdmin() {
+    function login() {
         if(!auth.currentUser) {
-            const e = prompt("الايميل:"), p = prompt("الباسورد:");
-            auth.signInWithEmailAndPassword(e,p).catch(a => alert("خطأ"));
-        } else {
-            const s = document.getElementById('admin-panel').style;
-            s.display = s.display === 'none' ? 'block' : 'none';
+            const e = prompt("البريد الإلكتروني:"), p = prompt("كلمة المرور:");
+            if(e && p) auth.signInWithEmailAndPassword(e,p).catch(() => alert("خطأ في البيانات"));
         }
     }
 
-    // إدارة البيانات
-    db.ref('ads').on('value', s => {
-        const sl = document.getElementById('slider'), adL = document.getElementById('adsList');
-        sl.innerHTML = ''; adL.innerHTML = '';
-        s.forEach(c => {
-            sl.innerHTML += `<img src="${c.val().i}">`;
-            if(auth.currentUser) adL.innerHTML += `<div style="padding:5px; border-bottom:1px solid #222;">إعلان <span onclick="del('ads','${c.key}')" style="color:red; float:left;">حذف</span></div>`;
+    // جلب البيانات (منتجات وإعلانات)
+    db.ref('ads').on('value', snap => {
+        const s = document.getElementById('slider'), am = document.getElementById('adsManage');
+        s.innerHTML = ''; am.innerHTML = '';
+        snap.forEach(c => {
+            s.innerHTML += `<img src="${c.val().i}">`;
+            if(auth.currentUser) am.innerHTML += `<div style="padding:5px; border-bottom:1px solid #222;">إعلان <span onclick="remove('ads','${c.key}')" style="color:red; float:left; cursor:pointer;">حذف</span></div>`;
         });
-        if(sl.firstChild) sl.firstChild.classList.add('active');
+        if(s.firstChild) s.firstChild.classList.add('active');
     });
 
-    db.ref('products').on('value', s => {
-        const l = document.getElementById('list'); l.innerHTML = '';
-        s.forEach(c => {
+    db.ref('products').on('value', snap => {
+        const g = document.getElementById('main-grid'); g.innerHTML = '';
+        snap.forEach(c => {
             const d = c.val();
-            l.innerHTML += `
+            const show = auth.currentUser ? 'block' : 'none';
+            g.innerHTML += `
                 <div class="card">
-                    <div class="admin-tools" style="display:${auth.currentUser?'block':'none'}">
-                        <i class="fas fa-trash" style="color:red" onclick="del('products','${c.key}')"></i>
-                    </div>
+                    <i class="fas fa-trash-alt del-icon" style="display:${show}" onclick="remove('products','${c.key}')"></i>
                     <img src="${d.i}">
-                    <h4 style="font-size:0.8rem">${d.n}</h4>
+                    <h4 style="margin:5px 0; font-size:0.85rem">${d.n}</h4>
                     <div class="price">${d.p} د.ع</div>
-                    <button onclick="addToCart('${d.n}', '${d.p}')" style="width:100%; padding:8px; background:var(--neon); border:none; border-radius:8px; font-weight:bold; font-size:0.7rem">إضافة للسلة</button>
+                    <button onclick="addToCart('${d.n}', '${d.p}')" style="width:100%; padding:8px; background:var(--neon); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إضافة للسلة</button>
                 </div>`;
         });
     });
 
     function upload() {
-        const t = document.getElementById('type').value, f = document.getElementById('file').files[0];
-        if(!f) return alert("اختر صورة");
+        const m = document.getElementById('mode').value, f = document.getElementById('pFile').files[0];
+        if(!f) return alert("اختر صورة أولاً");
+        const b = document.getElementById('pBtn'); b.innerText = "جارِ الرفع...";
         const r = new FileReader();
         r.onload = (e) => {
-            const o = { i: e.target.result };
-            if(t == 'p') { o.n = document.getElementById('name').value; o.p = document.getElementById('price').value; }
-            db.ref(t=='p'?'products':'ads').push(o).then(() => location.reload());
+            const data = { i: e.target.result };
+            if(m == 'p') { data.n = document.getElementById('pName').value; data.p = document.getElementById('pPrice').value; }
+            db.ref(m == 'p' ? 'products' : 'ads').push(data).then(() => { alert("تم النشر"); location.reload(); });
         };
         r.readAsDataURL(f);
     }
 
-    function del(p, id) { if(confirm("حذف؟")) db.ref(p+'/'+id).remove(); }
+    function remove(path, id) { if(confirm("هل تريد الحذف نهائياً؟")) db.ref(path+'/'+id).remove(); }
 
-    // نظام السلة المطور
-    function addToCart(n, p) {
-        cart.push({n, p});
-        updateCartUI();
-    }
-
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        updateCartUI();
-    }
-
-    function updateCartUI() {
-        document.getElementById('count').innerText = cart.length;
-        const container = document.getElementById('cart-items');
-        container.innerHTML = '';
-        cart.forEach((item, index) => {
-            container.innerHTML += `
-                <div class="cart-item">
-                    <span>${item.n} (${item.p} د.ع)</span>
-                    <i class="fas fa-minus-circle" style="color:red" onclick="removeFromCart(${index})"></i>
-                </div>`;
+    // نظام السلة
+    function addToCart(n, p) { myCart.push({n, p}); updateUI(); }
+    function showCart() { const v = document.getElementById('cart-view').style; v.display = v.display === 'block' ? 'none' : 'block'; }
+    function updateUI() {
+        document.getElementById('bCount').innerText = myCart.length;
+        const list = document.getElementById('cart-items'); list.innerHTML = '';
+        myCart.forEach((item, index) => {
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222;"><span>${item.n}</span><i class="fas fa-minus-circle" style="color:red" onclick="myCart.splice(${index},1); updateUI();"></i></div>`;
         });
     }
-
-    function sendOrder() {
-        if(cart.length === 0) return alert("السلة فارغة!");
-        let msg = "طلب جديد من Aboud Store:\n";
-        cart.forEach(i => msg += `- ${i.n} (${i.p})\n`);
-        window.location.href = `https://wa.me/9647818025533?text=${encodeURIComponent(msg)}`;
+    function orderNow() {
+        if(myCart.length === 0) return alert("السلة فارغة");
+        let text = "طلب جديد من متجر Aboud Store:\n";
+        myCart.forEach(i => text += `- ${i.n} (${i.p})\n`);
+        window.location.href = `https://wa.me/9647818025533?text=${encodeURIComponent(text)}`;
     }
 
     setInterval(() => {
-        const imgs = document.querySelectorAll('.slider-container img');
+        const imgs = document.querySelectorAll('.slider img');
         if(imgs.length < 2) return;
-        let a = document.querySelector('.slider-container img.active');
-        a.classList.remove('active');
-        let n = a.nextElementSibling || imgs[0];
-        n.classList.add('active');
+        let act = document.querySelector('.slider img.active');
+        act.classList.remove('active');
+        let nxt = act.nextElementSibling || imgs[0];
+        nxt.classList.add('active');
     }, 4000);
 </script>
 </body>
