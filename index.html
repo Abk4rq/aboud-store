@@ -20,13 +20,12 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; padding: 15px; }
         .card { background: var(--card); border-radius: 25px; padding: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: center; backdrop-filter: blur(5px); transition: 0.4s; }
         .card img { width: 100%; height: 160px; object-fit: contain; border-radius: 20px; background: #000; }
-        .card h3 { margin: 10px 0 5px 0; font-size: 1.1rem; }
-        /* استايل الوصف الجديد */
-        .desc { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; line-height: 1.4; display: block; }
+        .desc { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; display: block; min-height: 1.2em; }
         .price { color: var(--neon); font-weight: bold; margin-bottom: 12px; font-size: 1.1rem; }
         .add-cart { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; background: linear-gradient(45deg, var(--neon), #00a2ff); color: #000; cursor: pointer; }
         .cart-wrapper { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 3000; }
         .cart-float { background: linear-gradient(90deg, var(--neon), #0088ff); color: #000; padding: 18px; border-radius: 20px; display: none; justify-content: space-between; align-items: center; font-weight: 900; box-shadow: 0 8px 30px rgba(0, 242, 255, 0.4); cursor: pointer; }
+        .remove-item-btn { color: #ff4444; cursor: pointer; padding: 5px; margin-right: 10px; }
         #admin-panel { display: none; background: #111; padding: 25px; border: 1px solid var(--neon); margin: 20px; border-radius: 20px; }
         textarea, input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
     </style>
@@ -40,12 +39,13 @@
 </header>
 
 <div id="admin-panel">
-    <h3 style="color:var(--neon)">إضافة منتج جديد</h3>
+    <h3 id="formTitle" style="color:var(--neon)">إضافة منتج جديد</h3>
+    <input type="hidden" id="editId">
     <input type="text" id="pN" placeholder="اسم الجهاز">
-    <textarea id="pD" placeholder="وصف المنتج (مثلاً: ساعة مقاومة للماء، بطارية تدوم 7 أيام)"></textarea>
+    <textarea id="pD" placeholder="وصف المنتج"></textarea>
     <input type="text" id="pP" placeholder="السعر">
     <input type="file" id="pI" accept="image/*">
-    <button onclick="upload()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">نشر في المتجر</button>
+    <button id="mainBtn" onclick="handleAction()" style="width:100%; padding:15px; background:var(--neon); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">نشر الآن</button>
     <div id="admin-list" style="margin-top:25px;"></div>
 </div>
 
@@ -78,14 +78,35 @@
 
     function checkAdmin() { if(prompt("الرمز:") === "ABOJL2001") document.getElementById('admin-panel').style.display='block'; }
 
-    function upload() {
-        const n = document.getElementById('pN').value, d = document.getElementById('pD').value, p = document.getElementById('pP').value, i = document.getElementById('pI').files[0];
-        if(n && p && i) {
+    function handleAction() {
+        const id = document.getElementById('editId').value, n = document.getElementById('pN').value, d = document.getElementById('pD').value, p = document.getElementById('pP').value, i = document.getElementById('pI').files[0];
+        if(!n || !p) return alert("املأ الاسم والسعر");
+
+        const data = { n, d, p };
+        if(i) {
             const reader = new FileReader();
-            reader.onload = (e) => { db.ref('products').push({ n, d, p, i: e.target.result }).then(() => location.reload()); };
+            reader.onload = (e) => { 
+                data.i = e.target.result;
+                id ? db.ref('products/'+id).update(data) : db.ref('products').push(data);
+                location.reload();
+            };
             reader.readAsDataURL(i);
+        } else {
+            id ? db.ref('products/'+id).update(data).then(()=>location.reload()) : alert("اختر صورة");
         }
     }
+
+    function editProd(id, n, d, p) {
+        document.getElementById('editId').value = id;
+        document.getElementById('pN').value = n;
+        document.getElementById('pD').value = d;
+        document.getElementById('pP').value = p;
+        document.getElementById('formTitle').innerText = "تعديل المنتج";
+        document.getElementById('mainBtn').innerText = "حفظ التعديلات";
+        window.scrollTo(0, 0);
+    }
+
+    function deleteProd(id) { if(confirm("حذف نهائي؟")) db.ref('products/' + id).remove(); }
 
     function search() {
         const q = document.getElementById('searchBar').value.toLowerCase();
@@ -93,7 +114,13 @@
     }
 
     function addToCart(n, p) {
-        cart.push({ n, p: parseInt(p.replace(/,/g, '')) });
+        cart.push({ n, p: parseInt(p.toString().replace(/,/g, '')) });
+        updateCart();
+    }
+
+    function removeFromCart(idx, e) {
+        e.stopPropagation();
+        cart.splice(idx, 1);
         updateCart();
     }
 
@@ -104,15 +131,15 @@
         if(cart.length > 0) {
             bar.style.display = 'flex';
             document.getElementById('count').innerText = cart.length;
-            let sum = 0; det.innerHTML = '';
-            cart.forEach((x, i) => { sum += x.p; det.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #222;"><span>${x.n}</span><span>${x.p.toLocaleString()} د.ع</span></div>`; });
+            let sum = 0; det.innerHTML = '<h4 style="color:var(--neon)">السلة:</h4>';
+            cart.forEach((x, i) => { sum += x.p; det.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222;"><span>${x.n}</span><span>${x.p.toLocaleString()} <i class="fas fa-trash-alt remove-item-btn" onclick="removeFromCart(${i}, event)"></i></span></div>`; });
             document.getElementById('total').innerText = sum.toLocaleString();
-        }
+        } else { bar.style.display = 'none'; det.style.display = 'none'; }
     }
 
     function sendToWA(e) {
         e.stopPropagation();
-        let m = "طلب جديد:%0a";
+        let m = "طلب جديد من عبود ستور:%0a";
         cart.forEach((x, i) => m += `${i+1}- ${x.n}%0a`);
         window.open(`https://wa.me/9647818025533?text=${m}`);
     }
@@ -121,20 +148,17 @@
         const list = document.getElementById('main-list');
         list.innerHTML = '';
         data.forEach(p => {
-            list.innerHTML += `
-                <div class="card">
-                    <img src="${p.i}">
-                    <h3>${p.n}</h3>
-                    <span class="desc">${p.d || ''}</span>
-                    <div class="price">${p.p} د.ع</div>
-                    <button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button>
-                </div>`;
+            list.innerHTML += `<div class="card"><img src="${p.i}"><h3>${p.n}</h3><span class="desc">${p.d || ''}</span><div class="price">${p.p} د.ع</div><button class="add-cart" onclick="addToCart('${p.n}', '${p.p}')">إضافة للسلة</button></div>`;
         });
     }
 
     db.ref('products').on('value', s => {
         items = [];
-        s.forEach(c => { const d = c.val(); d.id = c.key; items.push(d); });
+        const aL = document.getElementById('admin-list'); aL.innerHTML = '';
+        s.forEach(c => {
+            const d = c.val(); d.id = c.key; items.push(d);
+            aL.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333"><span>${d.n}</span><div><button onclick="editProd('${d.id}','${d.n}','${d.d}','${d.p}')" style="background:orange; color:white; border:none; border-radius:5px; margin-left:5px">تعديل</button><button onclick="deleteProd('${d.id}')" style="background:red; color:white; border:none; border-radius:5px">حذف</button></div></div>`;
+        });
         display(items);
     });
 </script>
