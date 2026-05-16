@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aboud Store | النسخة الكاملة</title>
+    <title>Aboud Store | النسخة الشاملة</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -30,9 +30,11 @@
         /* البحث والأقسام */
         .search-area { padding: 10px 15px; }
         #searchBar { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
+        
         .categories { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; }
-        .cat-btn { padding: 8px 18px; background: var(--card); border: 1px solid #222; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; }
-        .cat-btn.active { background: var(--neon); color: black; border-color: var(--neon); }
+        .categories::-webkit-scrollbar { display: none; } /* إخفاء شريط التمرير المزعج */
+        .cat-btn { padding: 8px 18px; background: var(--card); border: 1px solid #222; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; cursor: pointer; color: #ccc; }
+        .cat-btn.active { background: var(--neon); color: black; border-color: var(--neon); font-weight: bold; }
 
         /* المنتجات */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
@@ -40,11 +42,11 @@
         .card img { width: 100%; border-radius: 10px; }
         .price { color: var(--neon); font-weight: bold; margin: 5px 0; font-size: 1.1rem; }
         
-        .admin-controls { position: absolute; top: 5px; left: 5px; display: none; gap: 4px; }
-        .ctrl-icon { background: rgba(0,0,0,0.7); padding: 5px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+        .admin-controls { position: absolute; top: 5px; left: 5px; display: none; gap: 4px; z-index: 10; }
+        .ctrl-icon { background: rgba(0,0,0,0.8); padding: 6px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
 
         /* السلة */
-        .cart-fab { position: fixed; bottom: 20px; left: 20px; background: var(--neon); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; z-index: 3000; box-shadow: 0 0 20px var(--neon); }
+        .cart-fab { position: fixed; bottom: 20px; left: 20px; background: var(--neon); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; z-index: 3000; box-shadow: 0 0 20px var(--neon); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -56,7 +58,10 @@
 </header>
 
 <div id="admin-panel">
-    <h3 id="formTitle">إضافة جديد</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="formTitle" style="margin:0;">إضافة جديد</h3>
+        <button onclick="auth.signOut(); location.reload()" style="background:red; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">خروج</button>
+    </div>
     <select id="uploadType" onchange="toggleFields()">
         <option value="product">منتج</option>
         <option value="ad">إعلان (سلايدر)</option>
@@ -65,18 +70,22 @@
     <div id="productFields">
         <input type="text" id="name" placeholder="اسم المنتج">
         <input type="text" id="price" placeholder="السعر">
-        <textarea id="desc" placeholder="الوصف"></textarea>
+        <textarea id="desc" placeholder="وصف المنتج"></textarea>
         <select id="cat">
-            <option value="ساعات">ساعات</option>
+            <option value="هواتف">هواتف</option>
             <option value="سماعات">سماعات</option>
-            <option value="اكسسوارات">اكسسوارات</option>
+            <option value="ساعات">ساعات</option>
+            <option value="شواحن">شواحن</option>
+            <option value="كابلات">كابلات</option>
+            <option value="عدسات">عدسات</option>
+            <option value="اكسسوارات">اكسسوارات عامة</option>
         </select>
     </div>
     
     <input type="file" id="file" accept="image/*">
     <input type="hidden" id="editId">
     <button onclick="submitData()" id="subBtn" class="btn-action">حفظ ونشر</button>
-    <div id="adsList" style="margin-top:10px;"></div>
+    <div id="adsList" style="margin-top:15px; border-top:1px solid #222; padding-top:10px;"></div>
 </div>
 
 <div class="slider-box" id="adsSlider"></div>
@@ -87,9 +96,13 @@
 
 <div class="categories">
     <div class="cat-btn active" onclick="filterCat('الكل', this)">الكل</div>
-    <div class="cat-btn" onclick="filterCat('ساعات', this)">ساعات</div>
+    <div class="cat-btn" onclick="filterCat('هواتف', this)">هواتف</div>
     <div class="cat-btn" onclick="filterCat('سماعات', this)">سماعات</div>
-    <div class="cat-btn" onclick="filterCat('اكسسوارات', this)">اكسسوارات</div>
+    <div class="cat-btn" onclick="filterCat('ساعات', this)">ساعات</div>
+    <div class="cat-btn" onclick="filterCat('شواحن', this)">شواحن</div>
+    <div class="cat-btn" onclick="filterCat('كابلات', this)">كابلات</div>
+    <div class="cat-btn" onclick="filterCat('عدسات', this)">عدسات</div>
+    <div class="cat-btn" onclick="filterCat('اكسسوارات', this)">اكسسوارات عامة</div>
 </div>
 
 <div class="grid" id="mainGrid"></div>
@@ -99,29 +112,32 @@
     <span id="cartCount" style="position:absolute; top:0; right:0; background:red; color:white; border-radius:50%; width:18px; height:18px; font-size:0.7rem; display:flex; align-items:center; justify-content:center;">0</span>
 </div>
 
-<div id="cartModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:4000; padding:20px;">
+<div id="cartModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:4000; padding:20px; box-sizing: border-box;">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--neon); padding-bottom:10px;">
         <h2>سلة الطلبات</h2>
-        <i class="fas fa-times" onclick="document.getElementById('cartModal').style.display='none'"></i>
+        <i class="fas fa-times" onclick="document.getElementById('cartModal').style.display='none'" style="cursor:pointer;"></i>
     </div>
-    <div id="cartItems" style="margin-top:20px;"></div>
-    <button onclick="sendWA()" style="width:100%; background:#25D366; color:white; border:none; padding:15px; border-radius:10px; margin-top:20px; font-weight:bold;">اطلب الآن عبر واتساب</button>
+    <div id="cartItems" style="margin-top:20px; max-height:60vh; overflow-y:auto;"></div>
+    <button onclick="sendWA()" style="width:100%; background:#25D366; color:white; border:none; padding:15px; border-radius:10px; margin-top:20px; font-weight:bold; font-size:1.1rem; cursor:pointer;">اطلب الآن عبر واتساب</button>
 </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyAQF4Tj_QSa09H9FZ90tT3WTvsaSf-nW9s", databaseURL: "https://aboud-store-f7a16-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth(), db = firebase.database();
-    let cart = [];
+    let allProducts = [], cart = [];
 
     auth.onAuthStateChanged(user => {
-        if(user) document.getElementById('admin-panel').style.display = 'block';
+        if(user) {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.querySelectorAll('.admin-controls').forEach(el => el.style.display = 'flex');
+        }
     });
 
     function handleAuth() {
         if(!auth.currentUser) {
             const e = prompt("الايميل:"), p = prompt("الباسورد:");
-            auth.signInWithEmailAndPassword(e,p).catch(() => alert("خطأ"));
+            if(e && p) auth.signInWithEmailAndPassword(e,p).catch(() => alert("خطأ في تسجيل الدخول"));
         }
     }
 
@@ -129,56 +145,88 @@
         document.getElementById('productFields').style.display = document.getElementById('uploadType').value === 'product' ? 'block' : 'none';
     }
 
-    // جلب الإعلانات للسلايدر
     db.ref('ads').on('value', s => {
         const slider = document.getElementById('adsSlider');
         const list = document.getElementById('adsList');
         slider.innerHTML = ''; list.innerHTML = '';
         s.forEach(c => {
             slider.innerHTML += `<img src="${c.val().i}">`;
-            if(auth.currentUser) list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #222;">إعلان <span onclick="del('ads','${c.key}')" style="color:red; float:left;">حذف</span></div>`;
+            if(auth.currentUser) list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #222; display:flex; justify-content:space-between;"><span>إعلان سلايدر</span><span onclick="del('ads','${c.key}')" style="color:red; cursor:pointer;">حذف</span></div>`;
         });
         if(slider.firstChild) slider.firstChild.classList.add('active');
     });
 
-    // جلب المنتجات
     db.ref('products').on('value', s => {
+        allProducts = [];
         const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
         s.forEach(c => {
             const p = c.val(); p.id = c.key;
+            allProducts.push(p);
             const isAdmin = auth.currentUser ? 'flex' : 'none';
             grid.innerHTML += `
                 <div class="card" data-cat="${p.c}" data-name="${p.n}">
                     <div class="admin-controls" style="display:${isAdmin}">
-                        <i class="fas fa-edit ctrl-icon" onclick="edit('${p.id}')"></i>
+                        <i class="fas fa-edit ctrl-icon" style="color:#fff" onclick="edit('${p.id}')"></i>
                         <i class="fas fa-trash ctrl-icon" style="color:red" onclick="del('products','${p.id}')"></i>
                     </div>
                     <img src="${p.i}">
-                    <h4>${p.n}</h4>
+                    <h4 style="margin:5px 0; font-size:0.9rem;">${p.n}</h4>
+                    <p style="font-size:0.75rem; color:#aaa; margin:5px 0; height:32px; overflow:hidden;">${p.d || ''}</p>
                     <div class="price">${p.p} د.ع</div>
-                    <button onclick="addToCart('${p.n}','${p.p}')" style="width:100%; background:var(--neon); border:none; padding:8px; border-radius:5px; font-weight:bold;">إضافة للسلة</button>
+                    <button onclick="addToCart('${p.n}','${p.p}')" style="width:100%; background:var(--neon); border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer;">إضافة للسلة</button>
                 </div>`;
         });
     });
+
+    function edit(id) {
+        const p = allProducts.find(x => x.id === id);
+        if(!p) return;
+        document.getElementById('name').value = p.n;
+        document.getElementById('price').value = p.p;
+        document.getElementById('desc').value = p.d || '';
+        document.getElementById('cat').value = p.c || 'هواتف';
+        document.getElementById('editId').value = id;
+        document.getElementById('uploadType').value = 'product';
+        toggleFields();
+        document.getElementById('formTitle').innerText = "تعديل منتج حركي";
+        window.scrollTo(0,0);
+    }
 
     function submitData() {
         const type = document.getElementById('uploadType').value;
         const file = document.getElementById('file').files[0];
         const editId = document.getElementById('editId').value;
-        const data = { n: document.getElementById('name').value, p: document.getElementById('price').value, d: document.getElementById('desc').value, c: document.getElementById('cat').value };
+        
+        const data = {
+            n: document.getElementById('name').value,
+            p: document.getElementById('price').value,
+            d: document.getElementById('desc').value,
+            c: document.getElementById('cat').value
+        };
 
         const save = (img) => {
             if(img) data.i = img;
             const ref = editId ? db.ref(`products/${editId}`) : db.ref(type === 'product' ? 'products' : 'ads').push();
-            ref.set(data).then(() => location.reload());
+            
+            if(editId && !img) {
+                // حفظ التعديل بدون تغيير الصورة القديمة
+                db.ref(`products/${editId}`).once('value', snap => {
+                    data.i = snap.val().i;
+                    db.ref(`products/${editId}`).set(data).then(() => location.reload());
+                });
+            } else {
+                ref.set(type === 'product' ? data : {i: img}).then(() => location.reload());
+            }
         };
 
         if(file) {
             const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(file);
-        } else if(editId) { save(); }
+        } else {
+            save();
+        }
     }
 
-    function del(path, id) { if(confirm("حذف؟")) db.ref(path+'/'+id).remove(); }
+    function del(path, id) { if(confirm("هل أنت متأكد من الحذف؟")) db.ref(path+'/'+id).remove().then(() => location.reload()); }
 
     function filterProducts() {
         const val = document.getElementById('searchBar').value.toLowerCase();
@@ -188,18 +236,26 @@
     function filterCat(cat, btn) {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        document.querySelectorAll('.card').forEach(c => c.style.display = (cat === 'الكل' || c.getAttribute('data-cat') === cat) ? 'block' : 'none');
+        document.querySelectorAll('.card').forEach(c => {
+            if(cat === 'الكل') {
+                c.style.display = 'block';
+            } else {
+                c.style.display = (c.getAttribute('data-cat') === cat || (cat === 'اكسسوارات' && c.getAttribute('data-cat') === 'اكسسوارات عامة')) ? 'block' : 'none';
+            }
+        });
     }
 
     function addToCart(n, p) { cart.push({n,p}); updateCart(); }
     function updateCart() {
         document.getElementById('cartCount').innerText = cart.length;
         const list = document.getElementById('cartItems'); list.innerHTML = '';
-        cart.forEach((item, i) => list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${item.n}</span><i class="fas fa-trash" style="color:red" onclick="cart.splice(${i},1); updateCart()"></i></div>`);
+        cart.forEach((item, i) => list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;"><span>${item.n} (${item.p} د.ع)</span><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="cart.splice(${i},1); updateCart()"></i></div>`);
     }
 
     function sendWA() {
-        let m = "طلب جديد:\n"; cart.forEach(i => m += `- ${i.n}\n`);
+        if(cart.length === 0) return alert("السلة فارغة حبيب قلبي");
+        let m = "طلب جديد من متجر Aboud Store:\n"; 
+        cart.forEach(i => m += `- ${i.n} (${i.p} د.ع)\n`);
         window.location.href = `https://wa.me/9647818025533?text=${encodeURIComponent(m)}`;
     }
 
@@ -207,9 +263,11 @@
         const imgs = document.querySelectorAll('.slider-box img');
         if(imgs.length < 2) return;
         let act = document.querySelector('.slider-box img.active');
-        act.classList.remove('active');
-        let nxt = act.nextElementSibling || imgs[0];
-        nxt.classList.add('active');
+        if(act) {
+            act.classList.remove('active');
+            let nxt = act.nextElementSibling || imgs[0];
+            nxt.classList.add('active');
+        }
     }, 4000);
 </script>
 </body>
