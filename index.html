@@ -17,7 +17,7 @@
         header { background: rgba(0,0,0,0.95); padding: 12px 15px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
         .logo { font-size: 1.4rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* ستايل الساعة والتاريخ المضاف الجديد */
+        /* ستايل الساعة والتاريخ المحدث */
         .datetime-container { text-align: left; font-size: 0.75rem; color: #aaa; font-weight: bold; line-height: 1.2; }
         .live-time { color: var(--neon); font-size: 0.85rem; font-family: monospace; }
 
@@ -270,15 +270,28 @@
         window.location.href = `https://wa.me/9647818025533?text=${encodeURIComponent(m)}`;
     }
 
-    // كود تشغيل وتحديث الساعة والتاريخ بشكل حي تلقائي
+    // تعديل كود جلب الوقت البرمجي ليعمل بشكل مستقل عن مشاكل المتصفحات المحلية
     function updateLiveDateTime() {
         const now = new Date();
         
-        // خيارات عرض الساعة بتوقيت العراق 12 ساعة
-        document.getElementById('liveTime').innerText = now.toLocaleTimeString('ar-IQ', { hour: '2-index', minute: '2-digit', second: '2-digit', hour12: true });
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+        const ampm = hours >= 12 ? 'م' : 'ص';
         
-        // خيارات عرض التاريخ ميلادي بالتسمية العربية الكاملة
-        document.getElementById('liveDate').innerText = now.toLocaleDateString('ar-IQ', { weekday: 'long', day: 'numeric', month: 'short' });
+        hours = hours % 12;
+        hours = hours ? hours : 12; // الساعة 0 تحول إلى 12
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        
+        // عرض الوقت المصلح بدقة وثبات
+        document.getElementById('liveTime').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
+        
+        // عرض التاريخ بشكل منسق وعربي ثابت
+        const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+        
+        document.getElementById('liveDate').innerText = `${days[now.getDay()]}، ${now.getDate()} ${months[now.getMonth()]}`;
     }
     setInterval(updateLiveDateTime, 1000);
     updateLiveDateTime();
