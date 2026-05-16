@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -32,15 +32,20 @@
         #searchBar { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
         
         .categories { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; }
-        .categories::-webkit-scrollbar { display: none; } /* إخفاء شريط التمرير المزعج */
+        .categories::-webkit-scrollbar { display: none; }
         .cat-btn { padding: 8px 18px; background: var(--card); border: 1px solid #222; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; cursor: pointer; color: #ccc; }
         .cat-btn.active { background: var(--neon); color: black; border-color: var(--neon); font-weight: bold; }
 
         /* المنتجات */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .card { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .card { background: var(--card); border-radius: 15px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; justify-content: space-between; }
         .card img { width: 100%; border-radius: 10px; }
-        .price { color: var(--neon); font-weight: bold; margin: 5px 0; font-size: 1.1rem; }
+        .card h4 { margin: 8px 0 4px 0; font-size: 0.95rem; font-weight: bold; }
+        
+        /* تعديل الوصف ليظهر بالكامل دون قص */
+        .desc { font-size: 0.8rem; color: #b3b3b3; margin: 4px 0 10px 0; line-height: 1.4; white-space: pre-line; }
+        
+        .price { color: var(--neon); font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
         
         .admin-controls { position: absolute; top: 5px; left: 5px; display: none; gap: 4px; z-index: 10; }
         .ctrl-icon { background: rgba(0,0,0,0.8); padding: 6px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
@@ -170,8 +175,8 @@
                         <i class="fas fa-trash ctrl-icon" style="color:red" onclick="del('products','${p.id}')"></i>
                     </div>
                     <img src="${p.i}">
-                    <h4 style="margin:5px 0; font-size:0.9rem;">${p.n}</h4>
-                    <p style="font-size:0.75rem; color:#aaa; margin:5px 0; height:32px; overflow:hidden;">${p.d || ''}</p>
+                    <h4>${p.n}</h4>
+                    <div class="desc">${p.d || ''}</div>
                     <div class="price">${p.p} د.ع</div>
                     <button onclick="addToCart('${p.n}','${p.p}')" style="width:100%; background:var(--neon); border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer;">إضافة للسلة</button>
                 </div>`;
@@ -209,7 +214,6 @@
             const ref = editId ? db.ref(`products/${editId}`) : db.ref(type === 'product' ? 'products' : 'ads').push();
             
             if(editId && !img) {
-                // حفظ التعديل بدون تغيير الصورة القديمة
                 db.ref(`products/${editId}`).once('value', snap => {
                     data.i = snap.val().i;
                     db.ref(`products/${editId}`).set(data).then(() => location.reload());
@@ -252,10 +256,14 @@
         cart.forEach((item, i) => list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;"><span>${item.n} (${item.p} د.ع)</span><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="cart.splice(${i},1); updateCart()"></i></div>`);
     }
 
+    // تعديل صيغة الرسالة التلقائية للواتساب لتشمل اسم المنتج والسعر بوضوح
     function sendWA() {
         if(cart.length === 0) return alert("السلة فارغة حبيب قلبي");
-        let m = "طلب جديد من متجر Aboud Store:\n"; 
-        cart.forEach(i => m += `- ${i.n} (${i.p} د.ع)\n`);
+        let m = "مرحباً Aboud Store، أود طلب المنتجات التالية:\n\n"; 
+        cart.forEach((item, index) => {
+            m += `${index + 1}️⃣ *اسم المنتج:* ${item.n}\n💰 *السعر:* ${item.p} د.ع\n`;
+            m += `----------------------------\n`;
+        });
         window.location.href = `https://wa.me/9647818025533?text=${encodeURIComponent(m)}`;
     }
 
