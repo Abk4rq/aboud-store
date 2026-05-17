@@ -84,6 +84,31 @@
         .footer-counter { display: flex; justify-content: center; align-items: center; margin: 30px 15px 10px 15px; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 15px; font-size: 0.9rem; color: #bbb; gap: 10px; box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.05); }
         .footer-counter span { color: var(--neon); font-weight: 900; font-size: 1.1rem; text-shadow: 0 0 8px rgba(0, 242, 255, 0.5); }
     </style>
+    /* تأثير الهيكل العظمي المؤقت الفخم المتناسق مع متجرك */
+.skeleton-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 15px;
+    height: 340px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+    
 </head>
 <body>
 
