@@ -12,7 +12,7 @@
     
     <style>
         :root { --neon: #00f2ff; --purple: #bc13fe; --bg: #050505; --card: rgba(255, 255, 255, 0.03); }
-        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 120px; }
+        body { background: var(--bg); color: white; font-family: 'Cairo', sans-serif; margin: 0; padding-bottom: 120px; scroll-behavior: smooth; }
         
         header { background: rgba(0,0,0,0.95); padding: 12px 15px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
         .logo { font-size: 1.4rem; font-weight: 900; background: linear-gradient(to right, var(--neon), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -33,6 +33,9 @@
         .search-area { padding: 10px 15px; }
         #searchBar { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
         
+        /* ستايل تمييز النيون للكلمات المبحوث عنها */
+        .highlight { background: var(--neon); color: black; font-weight: bold; padding: 0 2px; border-radius: 3px; box-shadow: 0 0 8px var(--neon); }
+
         .categories { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; }
         .categories::-webkit-scrollbar { display: none; }
         .cat-btn { padding: 8px 18px; background: var(--card); border: 1px solid #222; border-radius: 20px; white-space: nowrap; font-size: 0.8rem; cursor: pointer; color: #ccc; }
@@ -50,7 +53,7 @@
         .share-btn { position: absolute; top: 18px; left: 18px; background: rgba(255,255,255,0.07); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); color: #ccc; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; z-index: 5; transition: 0.2s; }
         .share-btn:hover { color: var(--neon); border-color: var(--neon); }
 
-        .card h4 { margin: 8px 0 2px 0; font-size: 0.95rem; font-weight: bold; }
+        .card h4 { margin: 8px 0 2px 0; font-size: 0.95rem; font-weight: bold; transition: 0.2s; }
         
         /* نظام النجوم للتقييم */
         .stars { color: #ffb700; font-size: 0.7rem; margin-bottom: 4px; display: flex; gap: 2px; }
@@ -72,6 +75,10 @@
 
         /* السلة */
         .cart-fab { position: fixed; bottom: 20px; left: 20px; background: var(--neon); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; z-index: 3000; box-shadow: 0 0 20px var(--neon); cursor: pointer; }
+
+        /* زر الصعود للأعلى الزجاجي */
+        .scroll-top-btn { position: fixed; bottom: 85px; left: 20px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(0, 242, 255, 0.3); color: var(--neon); width: 45px; height: 45px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 2900; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; }
+        .scroll-top-btn:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
 
         /* ستايل عداد الزوار العام بأسفل الصفحة */
         .footer-counter { display: flex; justify-content: center; align-items: center; margin: 30px 15px 10px 15px; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 15px; font-size: 0.9rem; color: #bbb; gap: 10px; box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.05); }
@@ -144,6 +151,10 @@
     <div>عدد زوار متجرنا: <span id="visitorCount">0</span> زائر</div>
 </div>
 
+<div class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
 <div class="cart-fab" onclick="document.getElementById('cartModal').style.display='block'">
     <i class="fas fa-shopping-basket"></i>
     <span id="cartCount" style="position:absolute; top:0; right:0; background:red; color:white; border-radius:50%; width:18px; height:18px; font-size:0.7rem; display:flex; align-items:center; justify-content:center;">0</span>
@@ -164,13 +175,17 @@
     const auth = firebase.auth(), db = firebase.database();
     let allProducts = [], cart = [];
 
+    // إعداد ملف الصوت الرقمي للتفاعل النيوني مع الأزرار
+    const clickSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav');
+    clickSound.volume = 0.3; // حجم صوت هادئ وناعم
+    function playClick() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
+
     // كود العداد الذكي: يمنع زيادة الزوار لو مسجل دخول كمسؤول (Admin)
     auth.onAuthStateChanged(user => {
         if(user) {
             document.getElementById('admin-panel').style.display = 'block';
             document.querySelectorAll('.admin-controls').forEach(el => el.style.display = 'flex');
         } else {
-            // تفعيل العداد فقط للزوار الحقيقيين وليس للمسؤول
             if (!sessionStorage.getItem('visited')) {
                 db.ref('visitors').transaction(currentValue => {
                     return (currentValue || 0) + 1;
@@ -206,7 +221,7 @@
         if(slider.firstChild) slider.firstChild.classList.add('active');
     });
 
-    // جلب وتوزيع المنتجات ديناميكياً مع الشارات والنجوم والمشاركة
+    // جلب المنتجات ديناميكياً مع الشارات والنجوم وتجهيز بنية العناوين الفردية
     db.ref('products').on('value', s => {
         allProducts = [];
         const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
@@ -215,7 +230,6 @@
             allProducts.push(p);
             const isAdmin = auth.currentUser ? 'flex' : 'none';
             
-            // تحديد الشارة تلقائياً حسب نوع القسم لجمالية التصميم
             let badgeText = "أصلي 100% ✨";
             if(p.c === 'هواتف' || p.c === 'ساعات') badgeText = "الأكثر مبيعاً 🔥";
             if(p.c === 'شواحن') badgeText = "شحن سريع ⚡";
@@ -223,7 +237,7 @@
             grid.innerHTML += `
                 <div class="card" data-cat="${p.c}" data-name="${p.n}">
                     <div class="badge">${badgeText}</div>
-                    <div class="share-btn" onclick="shareProduct('${p.n}', '${p.p}')" title="مشاركة المنتج">
+                    <div class="share-btn" onclick="playClick(); shareProduct('${p.n}', '${p.p}')" title="مشاركة المنتج">
                         <i class="fas fa-share-alt"></i>
                     </div>
                     <div class="admin-controls" style="display:${isAdmin}">
@@ -231,26 +245,64 @@
                         <i class="fas fa-trash ctrl-icon" style="color:red" onclick="del('products','${p.id}')"></i>
                     </div>
                     <img src="${p.i}">
-                    <h4>${p.n}</h4>
+                    <h4 class="product-title" data-original="${p.n}">${p.n}</h4>
                     <div class="stars">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                     <div class="desc">${p.d || ''}</div>
                     <div class="price">${p.p} د.ع</div>
-                    <button class="btn-add-cart" onclick="addToCart('${p.n}','${p.p}')">إضافة للسلة</button>
+                    <button class="btn-add-cart" onclick="playClick(); addToCart('${p.n}','${p.p}')">إضافة للسلة</button>
                 </div>`;
         });
     });
 
-    // دالة مشاركة ونسخ تفاصيل المنتج
     function shareProduct(name, price) {
         const text = `📦 المنتج: ${name}\n💰 السعر: ${price} د.ع\n📍 متوفر في Aboud Store!`;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => alert("تم نسخ تفاصيل المنتج! يمكنك مشاركتها الآن."));
+            navigator.clipboard.writeText(text).then(() => {
+                alert("تم نسخ تفاصيل المنتج بنجاح حبيب قلبي!");
+            }).catch(() => { alert("حدث خطأ أثناء النسخ."); });
         } else {
-            alert(text);
+            const textArea = document.createElement("textarea");
+            textArea.value = text; textArea.style.position = "fixed"; document.body.appendChild(textArea);
+            textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); alert("تم نسخ تفاصيل المنتج بنجاح!"); } catch (err) { alert(text); }
+            document.body.removeChild(textArea);
         }
     }
+
+    // دالة الفلترة الذكية المحدثة مع تلوين الكلمات المبحوث عنها بلون النيون
+    function filterProducts() {
+        const val = document.getElementById('searchBar').value.trim().toLowerCase();
+        document.querySelectorAll('.card').forEach(c => {
+            const titleEl = c.querySelector('.product-title');
+            const origName = titleEl.getAttribute('data-original');
+            
+            if (origName.toLowerCase().includes(val)) {
+                c.style.display = 'block';
+                if (val !== "") {
+                    // تحديد مكان الكلمة المبحوث عنها واستبدالها بالـ Span الملوّن
+                    const regex = new RegExp(`(${val})`, 'gi');
+                    titleEl.innerHTML = origName.replace(regex, `<span class="highlight">$1</span>`);
+                } else {
+                    titleEl.innerHTML = origName;
+                }
+            } else {
+                c.style.display = 'none';
+            }
+        });
+    }
+
+    // مراقبة النزول لأسفل الصفحة لإظهار/إخفاء زر الصعود للأعلى
+    window.onscroll = function() {
+        const btn = document.getElementById('scrollTopBtn');
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            btn.style.display = "flex";
+        } else {
+            btn.style.display = "none";
+        }
+    };
+    function scrollToTop() { playClick(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
     function edit(id) {
         const p = allProducts.find(x => x.id === id);
@@ -281,38 +333,24 @@
         const save = (img) => {
             if(img) data.i = img;
             const ref = editId ? db.ref(`products/${editId}`) : db.ref(type === 'product' ? 'products' : 'ads').push();
-            
             if(editId && !img) {
                 db.ref(`products/${editId}`).once('value', snap => {
                     data.i = snap.val().i;
                     db.ref(`products/${editId}`).set(data).then(() => location.reload());
                 });
-            } else {
-                ref.set(type === 'product' ? data : {i: img}).then(() => location.reload());
-            }
+            } else { ref.set(type === 'product' ? data : {i: img}).then(() => location.reload()); }
         };
-
-        if(file) {
-            const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(file);
-        } else {
-            save();
-        }
+        if(file) { const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(file); } else { save(); }
     }
 
     function del(path, id) { if(confirm("هل أنت متأكد من الحذف؟")) db.ref(path+'/'+id).remove().then(() => location.reload()); }
 
-    function filterProducts() {
-        const val = document.getElementById('searchBar').value.toLowerCase();
-        document.querySelectorAll('.card').forEach(c => c.style.display = c.getAttribute('data-name').toLowerCase().includes(val) ? 'block' : 'none');
-    }
-
     function filterCat(cat, btn) {
+        playClick();
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.querySelectorAll('.card').forEach(c => {
-            if(cat === 'الكل') {
-                c.style.display = 'block';
-            } else {
+            if(cat === 'الكل') { c.style.display = 'block'; } else {
                 c.style.display = (c.getAttribute('data-cat') === cat || (cat === 'اكسسوارات' && c.getAttribute('data-cat') === 'اكسسوارات عامة')) ? 'block' : 'none';
             }
         });
@@ -322,7 +360,7 @@
     function updateCart() {
         document.getElementById('cartCount').innerText = cart.length;
         const list = document.getElementById('cartItems'); list.innerHTML = '';
-        cart.forEach((item, i) => list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;"><span>${item.n} (${item.p} د.ع)</span><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="cart.splice(${i},1); updateCart()"></i></div>`);
+        cart.forEach((item, i) => list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;"><span>${item.n} (${item.p} د.ع)</span><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="playClick(); cart.splice(${i},1); updateCart()"></i></div>`);
     }
 
     function sendWA() {
@@ -338,28 +376,19 @@
     function updateLiveDateTime() {
         const now = new Date();
         let hours = now.getHours(); let minutes = now.getMinutes(); let seconds = now.getSeconds();
-        const ampm = hours >= 12 ? 'م' : 'ص';
-        hours = hours % 12; hours = hours ? hours : 12; 
+        const ampm = hours >= 12 ? 'م' : 'ص'; hours = hours % 12; hours = hours ? hours : 12; 
         minutes = minutes < 10 ? '0' + minutes : minutes; seconds = seconds < 10 ? '0' + seconds : seconds;
-        
         document.getElementById('liveTime').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
-        
         const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
         const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
         document.getElementById('liveDate').innerText = `${days[now.getDay()]}، ${now.getDate()} ${months[now.getMonth()]}`;
     }
-    setInterval(updateLiveDateTime, 1000);
-    updateLiveDateTime();
+    setInterval(updateLiveDateTime, 1000); updateLiveDateTime();
 
     setInterval(() => {
-        const imgs = document.querySelectorAll('.slider-box img');
-        if(imgs.length < 2) return;
+        const imgs = document.querySelectorAll('.slider-box img'); if(imgs.length < 2) return;
         let act = document.querySelector('.slider-box img.active');
-        if(act) {
-            act.classList.remove('active');
-            let nxt = act.nextElementSibling || imgs[0];
-            nxt.classList.add('active');
-        }
+        if(act) { act.classList.remove('active'); let nxt = act.nextElementSibling || imgs[0]; nxt.classList.add('active'); }
     }, 4000);
 </script>
 </body>
