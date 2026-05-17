@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aboud Store | النسخة الشاملة مع عداد زوار ظاهر</title>
+    <title>Aboud Store | النسخة الاحترافية الشاملة</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -40,14 +40,35 @@
 
         /* المنتجات */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .card { background: var(--card); border-radius: 15px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .card { background: var(--card); border-radius: 15px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
         .card img { width: 100%; border-radius: 10px; }
-        .card h4 { margin: 8px 0 4px 0; font-size: 0.95rem; font-weight: bold; }
+        
+        /* شارات الثقة الفخمة فوق الصورة */
+        .badge { position: absolute; top: 18px; right: 18px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); color: var(--neon); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--neon); font-weight: bold; z-index: 5; }
+        
+        /* زر مشاركة المنتج */
+        .share-btn { position: absolute; top: 18px; left: 18px; background: rgba(255,255,255,0.07); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); color: #ccc; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; z-index: 5; transition: 0.2s; }
+        .share-btn:hover { color: var(--neon); border-color: var(--neon); }
+
+        .card h4 { margin: 8px 0 2px 0; font-size: 0.95rem; font-weight: bold; }
+        
+        /* نظام النجوم للتقييم */
+        .stars { color: #ffb700; font-size: 0.7rem; margin-bottom: 4px; display: flex; gap: 2px; }
+
         .desc { font-size: 0.8rem; color: #b3b3b3; margin: 4px 0 10px 0; line-height: 1.4; white-space: pre-line; }
         .price { color: var(--neon); font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
         
-        .admin-controls { position: absolute; top: 5px; left: 5px; display: none; gap: 4px; z-index: 10; }
-        .ctrl-icon { background: rgba(0,0,0,0.8); padding: 6px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+        /* زر السلة مع نبض النيون الذكي */
+        .btn-add-cart { width: 100%; background: var(--neon); border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; animation: pulseGlow 2s infinite; }
+        
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 242, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
+        }
+
+        .admin-controls { position: absolute; top: 50px; left: 18px; display: none; flex-direction: column; gap: 4px; z-index: 10; }
+        .ctrl-icon { background: rgba(0,0,0,0.8); padding: 6px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; text-align: center; }
 
         /* السلة */
         .cart-fab { position: fixed; bottom: 20px; left: 20px; background: var(--neon); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; z-index: 3000; box-shadow: 0 0 20px var(--neon); cursor: pointer; }
@@ -143,24 +164,24 @@
     const auth = firebase.auth(), db = firebase.database();
     let allProducts = [], cart = [];
 
-    // كود زيادة عداد الزوار لكل زائر حقيقي جديد
-    if (!sessionStorage.getItem('visited')) {
-        db.ref('visitors').transaction(currentValue => {
-            return (currentValue || 0) + 1;
-        });
-        sessionStorage.setItem('visited', 'true');
-    }
-
-    // جلب عدد الزوار وعرضه في الفوتر للجميع تلقائياً وبشكل حيوي
-    db.ref('visitors').on('value', snap => {
-        document.getElementById('visitorCount').innerText = snap.val() || 0;
-    });
-
+    // كود العداد الذكي: يمنع زيادة الزوار لو مسجل دخول كمسؤول (Admin)
     auth.onAuthStateChanged(user => {
         if(user) {
             document.getElementById('admin-panel').style.display = 'block';
             document.querySelectorAll('.admin-controls').forEach(el => el.style.display = 'flex');
+        } else {
+            // تفعيل العداد فقط للزوار الحقيقيين وليس للمسؤول
+            if (!sessionStorage.getItem('visited')) {
+                db.ref('visitors').transaction(currentValue => {
+                    return (currentValue || 0) + 1;
+                });
+                sessionStorage.setItem('visited', 'true');
+            }
         }
+    });
+
+    db.ref('visitors').on('value', snap => {
+        document.getElementById('visitorCount').innerText = snap.val() || 0;
     });
 
     function handleAuth() {
@@ -185,6 +206,7 @@
         if(slider.firstChild) slider.firstChild.classList.add('active');
     });
 
+    // جلب وتوزيع المنتجات ديناميكياً مع الشارات والنجوم والمشاركة
     db.ref('products').on('value', s => {
         allProducts = [];
         const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
@@ -192,20 +214,43 @@
             const p = c.val(); p.id = c.key;
             allProducts.push(p);
             const isAdmin = auth.currentUser ? 'flex' : 'none';
+            
+            // تحديد الشارة تلقائياً حسب نوع القسم لجمالية التصميم
+            let badgeText = "أصلي 100% ✨";
+            if(p.c === 'هواتف' || p.c === 'ساعات') badgeText = "الأكثر مبيعاً 🔥";
+            if(p.c === 'شواحن') badgeText = "شحن سريع ⚡";
+
             grid.innerHTML += `
                 <div class="card" data-cat="${p.c}" data-name="${p.n}">
+                    <div class="badge">${badgeText}</div>
+                    <div class="share-btn" onclick="shareProduct('${p.n}', '${p.p}')" title="مشاركة المنتج">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
                     <div class="admin-controls" style="display:${isAdmin}">
                         <i class="fas fa-edit ctrl-icon" style="color:#fff" onclick="edit('${p.id}')"></i>
                         <i class="fas fa-trash ctrl-icon" style="color:red" onclick="del('products','${p.id}')"></i>
                     </div>
                     <img src="${p.i}">
                     <h4>${p.n}</h4>
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
                     <div class="desc">${p.d || ''}</div>
                     <div class="price">${p.p} د.ع</div>
-                    <button onclick="addToCart('${p.n}','${p.p}')" style="width:100%; background:var(--neon); border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer;">إضافة للسلة</button>
+                    <button class="btn-add-cart" onclick="addToCart('${p.n}','${p.p}')">إضافة للسلة</button>
                 </div>`;
         });
     });
+
+    // دالة مشاركة ونسخ تفاصيل المنتج
+    function shareProduct(name, price) {
+        const text = `📦 المنتج: ${name}\n💰 السعر: ${price} د.ع\n📍 متوفر في Aboud Store!`;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => alert("تم نسخ تفاصيل المنتج! يمكنك مشاركتها الآن."));
+        } else {
+            alert(text);
+        }
+    }
 
     function edit(id) {
         const p = allProducts.find(x => x.id === id);
@@ -292,22 +337,15 @@
 
     function updateLiveDateTime() {
         const now = new Date();
-        
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        let seconds = now.getSeconds();
+        let hours = now.getHours(); let minutes = now.getMinutes(); let seconds = now.getSeconds();
         const ampm = hours >= 12 ? 'م' : 'ص';
-        
-        hours = hours % 12;
-        hours = hours ? hours : 12; 
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
+        hours = hours % 12; hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes; seconds = seconds < 10 ? '0' + seconds : seconds;
         
         document.getElementById('liveTime').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
         
         const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
         const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-        
         document.getElementById('liveDate').innerText = `${days[now.getDay()]}، ${now.getDate()} ${months[now.getMonth()]}`;
     }
     setInterval(updateLiveDateTime, 1000);
