@@ -80,11 +80,11 @@
         .scroll-top-btn { position: fixed; bottom: 85px; left: 20px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(0, 242, 255, 0.3); color: var(--neon); width: 45px; height: 45px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 2900; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; }
         .scroll-top-btn:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
 
-        /* ستايل عداد الزوار العام بأسفل الصفحة */
-        .footer-counter { display: flex; justify-content: center; align-items: center; margin: 30px 15px 10px 15px; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 15px; font-size: 0.9rem; color: #bbb; gap: 10px; box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.05); }
-        .footer-counter span { color: var(--neon); font-weight: 900; font-size: 1.1rem; text-shadow: 0 0 8px rgba(0, 242, 255, 0.5); }
-    </style>
-    /* تأثير الهيكل العظمي المؤقت الفخم المتناسق مع متجرك */
+/* ستايل عداد الزوار العام بأسفل الصفحة */
+.footer-counter { display: flex; justify-content: center; align-items: center; }
+.footer-counter span { color: var(--neon); font-weight: 900; font-size: 1.2rem; }
+
+/* تأثير الهيكل العظمي المؤقت الفخم المتناسق مع متجرك */
 .skeleton-card {
     background: rgba(255, 255, 255, 0.03) !important;
     backdrop-filter: blur(10px);
@@ -95,7 +95,6 @@
     position: relative;
     overflow: hidden;
 }
-
 .skeleton-card::after {
     content: "";
     position: absolute;
@@ -103,12 +102,12 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
     animation: loading-shimmer 1.5s infinite;
 }
-
 @keyframes loading-shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
 }
-    
+
+</style>
 </head>
 <body>
 
