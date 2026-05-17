@@ -257,19 +257,27 @@
     });
 
     function shareProduct(name, price) {
-        const text = `📦 المنتج: ${name}\n💰 السعر: ${price} د.ع\n📍 متوفر في Aboud Store!`;
+    const shareData = {
+        title: `Aboud Store | ${name}`,
+        text: `📦 المنتج: ${name}\n💰 السعر: ${price} د.ع\n📍 متوفر في Aboud Store!`,
+        url: window.location.href
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData)
+            .then(() => console.log('تمت المشاركة بنجاح'))
+            .catch((error) => console.log('تم إلغاء المشاركة:', error));
+    } else {
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("تم نسخ تفاصيل المنتج بنجاح حبيب قلبي!");
-            }).catch(() => { alert("حدث خطأ أثناء النسخ."); });
+            navigator.clipboard.writeText(shareData.text).then(() => {
+                alert("تم نسخ تفاصيل المنتج! متصفحك لا يدعم المشاركة المباشرة.");
+            });
         } else {
-            const textArea = document.createElement("textarea");
-            textArea.value = text; textArea.style.position = "fixed"; document.body.appendChild(textArea);
-            textArea.focus(); textArea.select();
-            try { document.execCommand('copy'); alert("تم نسخ تفاصيل المنتج بنجاح!"); } catch (err) { alert(text); }
-            document.body.removeChild(textArea);
+            alert(shareData.text);
         }
     }
+}
+
 
     // دالة الفلترة الذكية المحدثة مع تلوين الكلمات المبحوث عنها بلون النيون
     function filterProducts() {
